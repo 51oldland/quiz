@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>掘支工题库练习</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif;background:#f5f6fa;color:#333;font-size:15px;min-height:100vh}
+.header{background:linear-gradient(135deg,#1a73e8,#0d5bba);color:#fff;padding:16px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.header h1{font-size:16px;font-weight:700;margin-bottom:4px}
+.header .progress-info{font-size:12px;opacity:.9}
+.progress-bar-wrap{background:rgba(255,255,255,.3);border-radius:10px;height:6px;margin-top:8px}
+.progress-bar{background:#fff;border-radius:10px;height:6px;transition:width .3s ease;width:0%}
+.section-title{background:#e8f0fe;color:#1a73e8;font-size:13px;font-weight:700;padding:10px 16px;margin-top:12px;border-left:4px solid #1a73e8}
+.question-card{background:#fff;margin:8px 12px;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.08);transition:box-shadow .2s}
+.question-card.answered{box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.q-num{display:inline-block;background:#1a73e8;color:#fff;font-size:12px;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:8px}
+.q-type-badge{display:inline-block;font-size:11px;padding:1px 6px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.badge-single{background:#e3f2fd;color:#1565c0}
+.badge-multi{background:#fce4ec;color:#c62828}
+.badge-judge{background:#e8f5e9;color:#2e7d32}
+.q-text{font-size:15px;line-height:1.6;margin-bottom:12px;color:#222}
+.options{display:flex;flex-direction:column;gap:8px}
+.option-btn{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;border:1.5px solid #e0e0e0;background:#fafafa;cursor:pointer;transition:all .15s;text-align:left;font-size:14px;line-height:1.5;width:100%}
+.option-btn:active{transform:scale(.98)}
+.option-btn.selected{border-color:#1a73e8;background:#e8f0fe}
+.option-btn.correct{border-color:#43a047;background:#e8f5e9;color:#2e7d32}
+.option-btn.wrong{border-color:#e53935;background:#ffebee;color:#c62828}
+.option-btn.show-correct{border-color:#43a047;background:#e8f5e9;color:#2e7d32;opacity:.8}
+.option-label{min-width:24px;height:24px;border-radius:50%;background:#e0e0e0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+.option-btn.correct .option-label{background:#43a047;color:#fff}
+.option-btn.wrong .option-label{background:#e53935;color:#fff}
+.option-btn.show-correct .option-label{background:#43a047;color:#fff}
+.option-btn.selected .option-label{background:#1a73e8;color:#fff}
+.judge-opts{display:flex;gap:10px}
+.judge-btn{flex:1;padding:12px;border-radius:10px;border:1.5px solid #e0e0e0;background:#fafafa;cursor:pointer;text-align:center;font-size:18px;transition:all .15s}
+.judge-btn.selected{border-color:#1a73e8;background:#e8f0fe}
+.judge-btn.correct{border-color:#43a047;background:#e8f5e9}
+.judge-btn.wrong{border-color:#e53935;background:#ffebee}
+.judge-btn.show-correct{border-color:#43a047;background:#e8f5e9;opacity:.8}
+.feedback{display:none;margin-top:10px;padding:8px 12px;border-radius:8px;font-size:13px;font-weight:600}
+.feedback.show{display:flex;align-items:center;gap:6px}
+.feedback.ok{background:#e8f5e9;color:#2e7d32}
+.feedback.fail{background:#ffebee;color:#c62828}
+.multi-hint{font-size:12px;color:#888;margin-bottom:8px}
+.multi-confirm-wrap{margin-top:10px}
+.multi-confirm-btn{background:#1a73e8;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:14px;cursor:pointer;width:100%}
+.multi-confirm-btn:disabled{background:#bdbdbd;cursor:default}
+.submit-wrap{padding:20px 16px 40px;text-align:center}
+.submit-btn{background:linear-gradient(135deg,#1a73e8,#0d5bba);color:#fff;border:none;border-radius:14px;padding:16px 48px;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(26,115,232,.4);width:100%;max-width:320px}
+.submit-btn:active{transform:scale(.97)}
+.result-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center}
+.result-modal.show{display:flex}
+.result-box{background:#fff;border-radius:20px;padding:32px 24px;text-align:center;width:88%;max-width:340px;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.result-score{font-size:56px;font-weight:800;color:#1a73e8;line-height:1}
+.result-total{font-size:16px;color:#888;margin-top:4px}
+.result-grade{font-size:22px;font-weight:700;margin:16px 0 8px}
+.result-detail{font-size:13px;color:#555;line-height:1.8;margin:12px 0 20px;background:#f5f6fa;border-radius:10px;padding:12px}
+.result-close{background:#1a73e8;color:#fff;border:none;border-radius:10px;padding:12px 32px;font-size:15px;cursor:pointer;margin-top:4px}
+.answered-check{float:right;font-size:16px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>⛏️ 掘支工题库练习</h1>
+  <div class="progress-info">已答 <span id="answered-count">0</span> / <span id="total-count">0</span> 题</div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar"></div></div>
+</div>
+
+<div id="quiz-container"></div>
+
+<div class="submit-wrap">
+  <button class="submit-btn" onclick="submitQuiz()">提交答卷 · 查看成绩</button>
+</div>
+
+<div class="result-modal" id="result-modal">
+  <div class="result-box">
+    <div style="font-size:13px;color:#888;margin-bottom:8px">答题结果</div>
+    <div class="result-score" id="res-score">0</div>
+    <div class="result-total" id="res-total">/ 100 分</div>
+    <div class="result-grade" id="res-grade"></div>
+    <div class="result-detail" id="res-detail"></div>
+    <button class="result-close" onclick="document.getElementById('result-modal').classList.remove('show')">关闭</button>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"id": "s0", "type": "single", "section": "一、单项选择题", "q": "《煤矿安全规程》规定，锚杆支护作业时，最大空顶距不得超过（ ）。", "answer": "B", "opts": [{"label": "A", "text": "0.5m"}, {"label": "B", "text": "1.0m"}, {"label": "C", "text": "1.5m"}]}, {"id": "s1", "type": "single", "section": "一、单项选择题", "q": "锚网支护工需每（ ）年参加一次复训。", "answer": "C", "opts": [{"label": "A", "text": "1"}, {"label": "B", "text": "2"}, {"label": "C", "text": "3"}]}, {"id": "s2", "type": "single", "section": "一、单项选择题", "q": "未按规定佩戴自救器作业的，属于（ ）违章行为。", "answer": "B", "opts": [{"label": "A", "text": "一般"}, {"label": "B", "text": "严重"}, {"label": "C", "text": "重大"}]}, {"id": "s3", "type": "single", "section": "一、单项选择题", "q": "锚杆支护质量验收由（ ）负责组织。", "answer": "B", "opts": [{"label": "A", "text": "班组长"}, {"label": "B", "text": "技术员"}, {"label": "C", "text": "安全员"}]}, {"id": "s4", "type": "single", "section": "一、单项选择题", "q": "《安全生产法》规定，事故隐患排查治理情况应当如实记录，并向（ ）通报。", "answer": "A", "opts": [{"label": "A", "text": "从业人员"}, {"label": "B", "text": "上级部门"}, {"label": "C", "text": "两者都要"}]}, {"id": "s5", "type": "single", "section": "一、单项选择题", "q": "锚杆安装时，树脂锚固剂的搅拌时间应控制在（ ）。", "answer": "B", "opts": [{"label": "A", "text": "10-15秒"}, {"label": "B", "text": "20-30秒"}, {"label": "C", "text": "40-60秒"}]}, {"id": "s6", "type": "single", "section": "一、单项选择题", "q": "锚杆托盘与岩面接触面积应大于（ ）。", "answer": "B", "opts": [{"label": "A", "text": "60%"}, {"label": "B", "text": "75%"}, {"label": "C", "text": "90%"}]}, {"id": "s7", "type": "single", "section": "一、单项选择题", "q": "锚索张拉时，张拉力应达到设计值的（ ）。", "answer": "B", "opts": [{"label": "A", "text": "80%"}, {"label": "B", "text": "100%"}, {"label": "C", "text": "120%"}]}, {"id": "s8", "type": "single", "section": "一、单项选择题", "q": "锚杆支护中，钢带的主要作用是（ ）。", "answer": "B", "opts": [{"label": "A", "text": "防止锚杆锈蚀"}, {"label": "B", "text": "均匀分布荷载."}, {"label": "C", "text": "减少钻孔深度"}]}, {"id": "s9", "type": "single", "section": "一、单项选择题", "q": "锚杆孔内岩粉未清理干净会导致（ ）。", "answer": "A", "opts": [{"label": "A", "text": "锚固力降低"}, {"label": "B", "text": "钻孔速度加快"}, {"label": "C", "text": "无影响"}]}, {"id": "s10", "type": "single", "section": "一、单项选择题", "q": "锚杆支护的“三径匹配”中，锚杆直径与钻孔直径的合理差值应为（ ）。", "answer": "A", "opts": [{"label": "A", "text": "4-6mm."}, {"label": "B", "text": "8-12mm"}, {"label": "C", "text": "15-20mm"}]}, {"id": "s11", "type": "single", "section": "一、单项选择题", "q": "高强锚杆的屈服强度标准是（ ）。", "answer": "B", "opts": [{"label": "A", "text": "≥335MPa"}, {"label": "B", "text": "≥500MPa"}, {"label": "C", "text": "≥600MPa"}]}, {"id": "s12", "type": "single", "section": "一、单项选择题", "q": "树脂锚固剂的固化时间随温度升高而（ ）。", "answer": "B", "opts": [{"label": "A", "text": "延长"}, {"label": "B", "text": "缩短"}, {"label": "C", "text": "不变"}]}, {"id": "s13", "type": "single", "section": "一、单项选择题", "q": "锚杆支护设计中，锚杆长度应至少穿过潜在破碎区（ ）。", "answer": "B", "opts": [{"label": "A", "text": "0.2m"}, {"label": "B", "text": "0.5m"}, {"label": "C", "text": "1.0m"}]}, {"id": "s14", "type": "single", "section": "一、单项选择题", "q": "锚杆预紧力矩的检测工具是（ ）。", "answer": "B", "opts": [{"label": "A", "text": "压力计"}, {"label": "B", "text": "扭矩扳手"}, {"label": "C", "text": "游标卡尺"}]}, {"id": "s15", "type": "single", "section": "一、单项选择题", "q": "锚杆安装完成后，外露长度应控制在（ ）。", "answer": "B", "opts": [{"label": "A", "text": "10-30mm"}, {"label": "B", "text": "30-50mm."}, {"label": "C", "text": "50-100mm"}]}, {"id": "s16", "type": "single", "section": "一、单项选择题", "q": "锚网支护作业中，锚杆间排距允许偏差为（ ）。", "answer": "B", "opts": [{"label": "A", "text": "±50mm"}, {"label": "B", "text": "±100mm."}, {"label": "C", "text": "±150mm"}]}, {"id": "s17", "type": "single", "section": "一、单项选择题", "q": "锚索张拉时，应分（ ）次逐步加载至设计预紧力。", "answer": "B", "opts": [{"label": "A", "text": "1"}, {"label": "B", "text": "2-3"}, {"label": "C", "text": "4-5"}]}, {"id": "s18", "type": "single", "section": "一、单项选择题", "q": "锚杆支护作业中，锚固剂搅拌完成后需等待（ ）再进行后续操作。", "answer": "B", "opts": [{"label": "A", "text": "10秒"}, {"label": "B", "text": "30秒"}, {"label": "C", "text": "60秒"}]}, {"id": "s19", "type": "single", "section": "一、单项选择题", "q": "发现锚索预紧力不足时，应采取的措施是（ ）。", "answer": "B", "opts": [{"label": "A", "text": "补打锚杆"}, {"label": "B", "text": "重新张拉"}, {"label": "C", "text": "增加钢带"}]}, {"id": "s20", "type": "single", "section": "一、单项选择题", "q": "锚杆支护中，锚固剂与钻孔直径的匹配关系应为（ ）。", "answer": "C", "opts": [{"label": "A", "text": "锚固剂直径略小于钻孔直径"}, {"label": "B", "text": "锚固剂直径等于钻孔直径"}, {"label": "C", "text": "锚固剂直径略大于钻孔直径"}]}, {"id": "s21", "type": "single", "section": "一、单项选择题", "q": "高强锚杆的杆体材质通常为（ ）。", "answer": "C", "opts": [{"label": "A", "text": "Q235钢"}, {"label": "B", "text": "20MnSi钢"}, {"label": "C", "text": "500MPa级螺纹钢"}]}, {"id": "s22", "type": "single", "section": "一、单项选择题", "q": "锚杆支护设计中，锚杆长度应至少穿过松动圈的（ ）。", "answer": "B", "opts": [{"label": "A", "text": "1/2"}, {"label": "B", "text": "1倍"}, {"label": "C", "text": "1.5倍"}]}, {"id": "s23", "type": "single", "section": "一、单项选择题", "q": "锚杆支护的“组合梁”理论适用于（ ）地质条件。", "answer": "B", "opts": [{"label": "A", "text": "坚硬完整顶板"}, {"label": "B", "text": "破碎层状顶板"}, {"label": "C", "text": "软岩膨胀顶板"}]}, {"id": "s24", "type": "single", "section": "一、单项选择题", "q": "锚索的极限破断力应满足安全系数不小于（ ）。", "answer": "B", "opts": [{"label": "A", "text": "1.5"}, {"label": "B", "text": "2.0"}, {"label": "C", "text": "2.5"}]}, {"id": "s25", "type": "single", "section": "一、单项选择题", "q": "26. 《煤矿安全规程》规定，锚杆支护作业时，迎头空顶距离超过（ ）必须停止作业进行支护。", "answer": "A", "opts": [{"label": "A", "text": "1.0m"}, {"label": "B", "text": "1.5m"}, {"label": "C", "text": "2.0m"}]}, {"id": "s26", "type": "single", "section": "一、单项选择题", "q": "锚网支护工未按规定佩戴防尘口罩作业，属于（ ）违章行为。", "answer": "A", "opts": [{"label": "A", "text": "一般"}, {"label": "B", "text": "严重"}, {"label": "C", "text": "重大"}]}, {"id": "s27", "type": "single", "section": "一、单项选择题", "q": "煤矿企业对新上岗锚网支护工的培训时间不得少于（ ）学时。", "answer": "B", "opts": [{"label": "A", "text": "48"}, {"label": "B", "text": "72"}, {"label": "C", "text": "96"}]}, {"id": "s28", "type": "single", "section": "一、单项选择题", "q": "因锚杆支护质量问题导致顶板事故，主要责任人是（ ）。", "answer": "B", "opts": [{"label": "A", "text": "操作工"}, {"label": "B", "text": "技术负责人"}, {"label": "C", "text": "班组长"}]}, {"id": "s29", "type": "single", "section": "一、单项选择题", "q": "《职业病防治法》规定，锚网支护工应每（ ）年进行一次职业健康检查。", "answer": "A", "opts": [{"label": "A", "text": "1"}, {"label": "B", "text": "2"}, {"label": "C", "text": "3"}]}, {"id": "s30", "type": "single", "section": "一、单项选择题", "q": "锚杆安装时，锚固剂的搅拌时间应控制在（ ）秒内。", "answer": "B", "opts": [{"label": "A", "text": "10-20"}, {"label": "B", "text": "20-30"}, {"label": "C", "text": "40-60"}]}, {"id": "s31", "type": "single", "section": "一、单项选择题", "q": "锚杆支护完成后，拉拔力抽检率不得低于（ ）。", "answer": "B", "opts": [{"label": "A", "text": "5%"}, {"label": "B", "text": "10%"}, {"label": "C", "text": "15%"}]}, {"id": "s32", "type": "single", "section": "一、单项选择题", "q": "锚网支护作业中，钢带搭接长度应不小于（ ）。", "answer": "B", "opts": [{"label": "A", "text": "50mm"}, {"label": "B", "text": "100mm"}, {"label": "C", "text": "150mm"}]}, {"id": "s33", "type": "single", "section": "一、单项选择题", "q": "锚杆钻孔时，发现孔内有瓦斯涌出，应（ ）。", "answer": "B", "opts": [{"label": "A", "text": "继续钻孔"}, {"label": "B", "text": "停止作业并汇报"}, {"label": "C", "text": "加大供风量"}]}, {"id": "s34", "type": "single", "section": "一、单项选择题", "q": "锚索张拉机具使用前需检查（ ）。", "answer": "A", "opts": [{"label": "A", "text": "油压表精度"}, {"label": "B", "text": "操作人员证件"}, {"label": "C", "text": "设备外观颜色"}]}, {"id": "s35", "type": "single", "section": "一、单项选择题", "q": "锚杆支护中，锚固剂应（ ）装入钻孔。", "answer": "B", "opts": [{"label": "A", "text": "先快速搅拌再缓慢推入"}, {"label": "B", "text": "先装入锚固剂再插入锚杆"}, {"label": "C", "text": "混合后立即塞入"}]}, {"id": "s36", "type": "single", "section": "一、单项选择题", "q": "锚杆托盘与岩面接触不实，可能导致（ ）。", "answer": "A", "opts": [{"label": "A", "text": "预紧力不足"}, {"label": "B", "text": "锚杆锈蚀"}, {"label": "C", "text": "钻孔偏斜"}]}, {"id": "s37", "type": "single", "section": "一、单项选择题", "q": "锚网支护工接班后，首先应（ ）。", "answer": "A", "opts": [{"label": "A", "text": "检查顶帮安全"}, {"label": "B", "text": "准备工具材料"}, {"label": "C", "text": "调试钻机"}]}, {"id": "s38", "type": "single", "section": "一、单项选择题", "q": "锚杆支护时，钻孔直径比锚杆直径大（ ）mm为宜。", "answer": "B", "opts": [{"label": "A", "text": "2-4"}, {"label": "B", "text": "4-6"}, {"label": "C", "text": "8-10"}]}, {"id": "s39", "type": "single", "section": "一、单项选择题", "q": "锚索锁具安装后，外露长度应≤（ ）mm。", "answer": "A", "opts": [{"label": "A", "text": "100"}, {"label": "B", "text": "150"}, {"label": "C", "text": "200"}]}, {"id": "s40", "type": "single", "section": "一、单项选择题", "q": "锚杆支护的“挤压加固理论”适用于（ ）围岩条件。", "answer": "B", "opts": [{"label": "A", "text": "坚硬完整"}, {"label": "B", "text": "破碎松散"}, {"label": "C", "text": "膨胀软岩"}]}, {"id": "s41", "type": "single", "section": "一、单项选择题", "q": "树脂锚固剂的凝胶时间通常为（ ）分钟。", "answer": "B", "opts": [{"label": "A", "text": "0.5-1"}, {"label": "B", "text": "1-3"}, {"label": "C", "text": "3-5"}]}, {"id": "s42", "type": "single", "section": "一、单项选择题", "q": "锚杆支护设计中，锚杆长度应至少穿透潜在破碎区（ ）m。", "answer": "B", "opts": [{"label": "A", "text": "0.3"}, {"label": "B", "text": "0.5"}, {"label": "C", "text": "1.0"}]}, {"id": "s43", "type": "single", "section": "一、单项选择题", "q": "高强锚杆的屈服强度应≥（ ）MPa。", "answer": "B", "opts": [{"label": "A", "text": "400"}, {"label": "B", "text": "500"}, {"label": "C", "text": "600"}]}, {"id": "s44", "type": "single", "section": "一、单项选择题", "q": "锚杆支护的“悬吊理论”认为锚杆可将不稳定岩层悬吊至（ ）。", "answer": "B", "opts": [{"label": "A", "text": "直接顶"}, {"label": "B", "text": "老顶"}, {"label": "C", "text": "底板"}]}, {"id": "s45", "type": "single", "section": "一、单项选择题", "q": "任何单位、组织和个人（以下统称举报人）有权向（    ）以上地方人民政府负有矿山安全生产监管职责的部门或者各级矿山安全监察机构（以下统称矿山安全监管监察部门）举报矿山重大隐患和安全生产违法行为。", "answer": "C", "opts": [{"label": "A", "text": "省级"}, {"label": "B", "text": "市级"}, {"label": "C", "text": "县级"}]}, {"id": "s46", "type": "single", "section": "一、单项选择题", "q": "《矿山安全生产举报奖励实施细则（试行）》规定，国家矿山安全监察局接到举报，按程序转至省级矿山安全监管监察部门办理。其中，属于煤矿重大隐患的举报，转至（  ）办理。", "answer": "A", "opts": [{"label": "A", "text": "省级矿山安全监察机构"}, {"label": "B", "text": "省级矿山安全监管部门"}, {"label": "C", "text": "省级人民政府"}]}, {"id": "s47", "type": "single", "section": "一、单项选择题", "q": "《矿山安全生产举报奖励实施细则（试行）》规定，国家矿山安全监察局接到举报，按程序转至省级矿山安全监管监察部门办理。其中，属于煤矿重大隐患以外的举报，转至（   ）办理。", "answer": "B", "opts": [{"label": "A", "text": "省级矿山安全监察机构"}, {"label": "B", "text": "省级矿山安全监管部门"}, {"label": "C", "text": "省级人民政府"}]}, {"id": "s48", "type": "single", "section": "一、单项选择题", "q": "省级及以下矿山安全监管监察部门应当自收到举报之日起（  ）个工作日内作出是否受理的决定，并告知举报人。", "answer": "C", "opts": [{"label": "A", "text": "15"}, {"label": "B", "text": "10"}, {"label": "C", "text": "5"}]}, {"id": "s49", "type": "single", "section": "一、单项选择题", "q": "对举报实行等级管理。二级管理是指查实与举报的矿山重大隐患、安全生产违法行为的事实和地点基本相符，且矿山重大隐患、安全生产违法行为发生之日起（  ）日（不含）后举报的。", "answer": "C", "opts": [{"label": "A", "text": "10"}, {"label": "B", "text": "5"}, {"label": "C", "text": "3"}]}, {"id": "s50", "type": "single", "section": "一、单项选择题", "q": "查实矿山重大隐患和安全生产违法行为（瞒报、谎报生产安全事故除外）的奖励。属于一级举报的，奖励金额按照行政处罚金额的（ ）计算。", "answer": "A", "opts": [{"label": "A", "text": "15%"}, {"label": "B", "text": "12%"}, {"label": "C", "text": "10%"}]}, {"id": "s51", "type": "single", "section": "一、单项选择题", "q": "举报人应当在接到领奖通知（ ）日内携带有效证件到指定地点领取。", "answer": "C", "opts": [{"label": "A", "text": "10"}, {"label": "B", "text": "30"}, {"label": "C", "text": "60"}]}, {"id": "s52", "type": "single", "section": "一、单项选择题", "q": "根据东庞矿安全生产举报奖励标准，以下哪种情形的举报奖励金额在3000-5000元之间（   ）。", "answer": "C", "opts": [{"label": "A", "text": "安排未经培训的特种作业人员上岗"}, {"label": "B", "text": "违章指挥，强令冒险作业"}, {"label": "C", "text": "超能力、超强度或者超定员组织生产"}, {"label": "D", "text": "煤矿改制期间未明确安全生产责任人"}]}, {"id": "s53", "type": "single", "section": "一、单项选择题", "q": "举报人应当向哪个部门举报矿所管辖区域的事故隐患和安全生产违法行为（   ）。", "answer": "D", "opts": [{"label": "A", "text": "矿纪委"}, {"label": "B", "text": "矿安检科"}, {"label": "C", "text": "纪委副书记"}, {"label": "D", "text": "所有上述部门"}]}, {"id": "s54", "type": "single", "section": "一、单项选择题", "q": "举报人举报并查实存在未按规定开展安全风险辨识和隐患排查的情形，可能获得的奖励金额是多少（   ）。", "answer": "B", "opts": [{"label": "A", "text": "3000-5000元"}, {"label": "B", "text": "1000-2000元"}, {"label": "C", "text": "500-1000元"}, {"label": "D", "text": "500元"}]}, {"id": "s55", "type": "single", "section": "一、单项选择题", "q": "患有高血压、心脏病、高度近视等病症以及其他不适应高空（2m以上）作业者，不得从事（    ）作业。", "answer": "A", "opts": [{"label": "A", "text": "高空"}, {"label": "B", "text": "危险"}, {"label": "C", "text": "登高"}]}, {"id": "s56", "type": "single", "section": "一、单项选择题", "q": "从业人员需要进行职业病诊断、鉴定的，煤矿企业应当（    ）提供职业病诊断、鉴定所需的从业人员职业史和职业病危害接触史、工作场所职业病危害因素检测结果等资料。", "answer": "A", "opts": [{"label": "A", "text": "如实"}, {"label": "B", "text": "适当收费"}, {"label": "C", "text": "不予"}]}, {"id": "s57", "type": "single", "section": "一、单项选择题", "q": "煤矿企业（ ）为从业人员建立职业健康监护档案，并按照规定的期限妥善保存。", "answer": "B", "opts": [{"label": "A", "text": "根据需要"}, {"label": "B", "text": "应当"}, {"label": "C", "text": "可以"}]}, {"id": "s58", "type": "single", "section": "一、单项选择题", "q": "从业人员离开煤矿企业时，（   ）索取本人职业健康监护档案复印件，煤矿企业必须如实、无偿提供，并在所提供的复印件上签章。", "answer": "A", "opts": [{"label": "A", "text": "有权"}, {"label": "B", "text": "无权"}, {"label": "C", "text": "可以"}]}, {"id": "s59", "type": "single", "section": "一、单项选择题", "q": "用人单位应当为劳动者创造符合（   ）和卫生要求的工作环境和条件，并采取措施保障劳动者获得职业卫生保护。", "answer": "A", "opts": [{"label": "A", "text": "国家职业卫生标准"}, {"label": "B", "text": "地方卫生标准"}, {"label": "C", "text": "国际卫生标准"}]}, {"id": "s60", "type": "single", "section": "一、单项选择题", "q": "（    ）依法对职业病防治工作进行监督，维护劳动者的合法权益。", "answer": "B", "opts": [{"label": "A", "text": "学会组织"}, {"label": "B", "text": "工会组织"}, {"label": "C", "text": "职业病研究院"}]}, {"id": "s61", "type": "single", "section": "一、单项选择题", "q": "用人单位的（    ）对本单位的职业病防治工作全面负责。", "answer": "B", "opts": [{"label": "A", "text": "分管技术负责人"}, {"label": "B", "text": "主要负责人"}, {"label": "C", "text": "分管安全负责人"}]}, {"id": "s62", "type": "single", "section": "一、单项选择题", "q": "（   ）应当建立、健全职业病防治责任制，加强对职业病防治的管理，提高职业病防治水平，对本单位产生的职业病危害承担责任。", "answer": "C", "opts": [{"label": "A", "text": "职业病研究院"}, {"label": "B", "text": "政府部门"}, {"label": "C", "text": "用人单位"}]}, {"id": "s63", "type": "single", "section": "一、单项选择题", "q": "患有高血压、心脏病、高度近视等病症以及其他不适应高空（3m以上）作业者，不得从事（    ）作业。", "answer": "A", "opts": [{"label": "A", "text": "高空"}, {"label": "B", "text": "危险"}, {"label": "C", "text": "登高"}]}, {"id": "s64", "type": "single", "section": "一、单项选择题", "q": "从业人员需要进行职业病诊断、鉴定的，煤矿企业应当（    ）提供职业病诊断、鉴定所需的从业人员职业史和职业病危害接触史、工作场所职业病危害因素检测结果等资料。", "answer": "A", "opts": [{"label": "A", "text": "如实"}, {"label": "B", "text": "适当收费"}, {"label": "C", "text": "不予"}]}, {"id": "s65", "type": "single", "section": "一、单项选择题", "q": "安全避险\"六大系统\"是坚持（ ），有效降低事故危害成都、防范遏制重特大事故的综合治理措施。", "answer": "A", "opts": [{"label": "A", "text": "预防为主"}, {"label": "B", "text": "不安全不生产"}, {"label": "C", "text": "以人为本"}, {"label": "D", "text": "安全发展"}]}, {"id": "s66", "type": "single", "section": "一、单项选择题", "q": "(   ）是建设完善煤矿井下安全避险\"六大系统\"的责任主体。", "answer": "B", "opts": [{"label": "A", "text": "国家安全生产监督总局"}, {"label": "B", "text": "煤矿企业"}, {"label": "C", "text": "集团公司"}, {"label": "D", "text": "国家煤矿安全监察局"}]}, {"id": "s67", "type": "single", "section": "一、单项选择题", "q": "监测监控系统在瓦斯超限后应自动切断被控设备的电源，并保持( ）状态。", "answer": "C", "opts": [{"label": "A", "text": "执行机构"}, {"label": "B", "text": "断电"}, {"label": "C", "text": "闭锁"}, {"label": "D", "text": "开关控制"}]}, {"id": "s68", "type": "single", "section": "一、单项选择题", "q": "监测监控系统地面中心站要装备（  ）套主机，确保系统24小时不间断运行。", "answer": "B", "opts": [{"label": "A", "text": "1"}, {"label": "B", "text": "2"}, {"label": "C", "text": "3"}, {"label": "D", "text": "4"}]}, {"id": "s69", "type": "single", "section": "一、单项选择题", "q": "按规定应对传感器定期（  )，保证监察数据准确可靠。", "answer": "A", "opts": [{"label": "A", "text": "调校     \nB 、更换"}, {"label": "C", "text": "检修"}, {"label": "D", "text": "通电"}]}, {"id": "s70", "type": "single", "section": "一、单项选择题", "q": "煤矿企业（  ) 是建设完善煤矿井下安全避险\"六大系统\"的第一责任人。", "answer": "A", "opts": [{"label": "B", "text": "机电矿长"}, {"label": "C", "text": "生产矿长"}, {"label": "D", "text": "董事长"}]}, {"id": "s71", "type": "single", "section": "一、单项选择题", "q": "井下（  ）是集井下人员考勤、跟踪定位、灾后急救、日常管理等一体的综合性运用系统。", "answer": "A", "opts": [{"label": "A", "text": "人员定位系统"}, {"label": "B", "text": "监测监控系统"}, {"label": "C", "text": "紧急避险系统"}, {"label": "D", "text": "灾后重建系统"}]}, {"id": "s72", "type": "single", "section": "一、单项选择题", "q": "压风自救系统的管路必须符合主管路直径不小于（ ）毫米，采掘工作面管路直径不小于（  ）毫米的要求。", "answer": "D", "opts": [{"label": "A", "text": "200 100"}, {"label": "B", "text": "50 100"}, {"label": "C", "text": "150 100"}, {"label": "D", "text": "100  50"}]}, {"id": "s73", "type": "single", "section": "一、单项选择题", "q": "矿井压风管路应设置供气阀门，间隔不大于( ）米。", "answer": "D", "opts": [{"label": "A", "text": "100"}, {"label": "B", "text": "50"}, {"label": "C", "text": "150"}, {"label": "D", "text": "200"}]}, {"id": "s74", "type": "single", "section": "一、单项选择题", "q": "压风管路的主送气管路应装（   )。", "answer": "C", "opts": [{"label": "A", "text": "减压阀"}, {"label": "B", "text": "截止阀"}, {"label": "C", "text": "集水放水器"}, {"label": "D", "text": "降噪器"}]}, {"id": "m0", "type": "multi", "section": "二、多项选择题", "q": "《河北省安全生产举报和奖励办法（实行）》中举报人应对举报内容的（  ）举报事项，不得诬告、陷害他人或企业，否则依法追究举报人责任。", "answer": "ABCD", "opts": [{"label": "A", "text": "真实性负责"}, {"label": "B", "text": "不得捏造"}, {"label": "C", "text": "歪曲事实"}, {"label": "D", "text": "不得故意制造"}]}, {"id": "m1", "type": "multi", "section": "二、多项选择题", "q": "《河北省安全生产举报和奖励办法（实行）》中有关部门受理举报后，应当及时组织核查处理举报事项，受理及核查工作应（  ），相关资料应妥善保管，核查组对核查结果负责。", "answer": "AC", "opts": [{"label": "A", "text": "全程留痕"}, {"label": "B", "text": "及时开展"}, {"label": "C", "text": "闭环管理"}, {"label": "D", "text": "延长时间"}]}, {"id": "m2", "type": "multi", "section": "二、多项选择题", "q": "河北省安全生产举报和奖励办法（实行）》中举报人应当提供有效的证据线索，明确举报对象、举报事项以及违法违规事实，可以提供照片、视频、音频、文字等资料。存在以下情形之一的（）有关部门可以不予受理并及时告知举报人：", "answer": "ABCD", "opts": [{"label": "A", "text": "举报人未提供有效线索，无明确的举报对象、举报事项以及未说明违法基本事实的"}, {"label": "B", "text": "举报事项已办结或正在办理中，举报人重复举报或多部门举报且未提出新的有效线索的"}, {"label": "C", "text": "生产经营单位自查或内部举报的事故隐患，已建立整改台账并对外公示，且正在整改中或已整改完毕的"}, {"label": "D", "text": "生产经营单位自查或内部举报的事故隐患，负有安全生产监管、监察职责的人员以及执法、督导检查中聘请的专家或者其他人员举报的，或授意他人举报的"}]}, {"id": "m3", "type": "multi", "section": "二、多项选择题", "q": "《河北省安全生产举报和奖励办法（实行）》中举报人可以通过（  ）热线电话、安全生产举报系统、部门网站、部门举报电话、电子邮件、书信、来访等多种方式进行举报。", "answer": "BD", "opts": [{"label": "A", "text": "96119"}, {"label": "B", "text": "12345"}, {"label": "C", "text": "123456"}, {"label": "D", "text": "12350"}]}, {"id": "m4", "type": "multi", "section": "二、多项选择题", "q": "《河北省安全生产举报和奖励办法（实行）》中规定安全生产举报和奖励工作遵循\"（   ）的原则，各有关部门根据职责权限和管辖层级受理举报事项。", "answer": "ABD", "opts": [{"label": "A", "text": "属地管理、分级负责"}, {"label": "B", "text": "\"谁主管、谁负责\""}, {"label": "C", "text": "现场取证、监督检查"}, {"label": "D", "text": "\"谁受理、谁奖励\""}]}, {"id": "m5", "type": "multi", "section": "二、多项选择题", "q": "紧急避险系统应随井下采掘系统的变化及时完善，包括(      )。", "answer": "ABCD", "opts": [{"label": "A", "text": "紧急避险设施"}, {"label": "B", "text": "配套系统"}, {"label": "C", "text": "避灾路线"}, {"label": "D", "text": "应急预案"}]}, {"id": "m6", "type": "multi", "section": "二、多项选择题", "q": "矿井要求综采工作面（     ）必须安装扩播电话。", "answer": "ABCD", "opts": [{"label": "A", "text": "进回风巷口"}, {"label": "B", "text": "集中配电点"}, {"label": "C", "text": "皮带机头"}, {"label": "D", "text": "皮带机尾"}]}, {"id": "m7", "type": "multi", "section": "二、多项选择题", "q": "供水施救系统的安装地点应满足（    ）要求。", "answer": "ABC", "opts": [{"label": "A", "text": "支护良好"}, {"label": "B", "text": "人行道侧"}, {"label": "C", "text": "无杂物地点"}, {"label": "D", "text": "水沟盖板不全的地点"}]}, {"id": "m8", "type": "multi", "section": "二、多项选择题", "q": "矿井对供水施救系统的要求是（    )。", "answer": "ABCD", "opts": [{"label": "A", "text": "操作简单、快捷"}, {"label": "B", "text": "系统可靠"}, {"label": "C", "text": "阀门开关灵活"}, {"label": "D", "text": "水流通畅"}]}, {"id": "m9", "type": "multi", "section": "二、多项选择题", "q": "矿要求（    ）必须设置供水管路。", "answer": "ABCD", "opts": [{"label": "A", "text": "采掘工作面"}, {"label": "B", "text": "溜煤眼口"}, {"label": "C", "text": "运输转载点"}, {"label": "D", "text": "回采工作面"}]}, {"id": "m10", "type": "multi", "section": "二、多项选择题", "q": "锚网支护工上岗前必须掌握的内容包括（ ）。", "answer": "ABC", "opts": [{"label": "A", "text": "顶板管理知识"}, {"label": "B", "text": "锚杆安装工艺"}, {"label": "C", "text": "应急预案"}, {"label": "D", "text": "设备维修技能"}]}, {"id": "m11", "type": "multi", "section": "二、多项选择题", "q": "下列属于锚杆支护质量验收指标的是（ ）。", "answer": "ABC", "opts": [{"label": "A", "text": "锚杆预紧力"}, {"label": "B", "text": "锚杆间排距"}, {"label": "C", "text": "锚杆外露长度"}, {"label": "D", "text": "锚固剂用量"}]}, {"id": "m12", "type": "multi", "section": "二、多项选择题", "q": "树脂锚固剂失效的可能原因有（ ）。", "answer": "ABCD", "opts": [{"label": "A", "text": "搅拌时间不足"}, {"label": "B", "text": "孔内潮湿"}, {"label": "C", "text": "过期使用"}, {"label": "D", "text": "钻孔直径过大"}]}, {"id": "m13", "type": "multi", "section": "二、多项选择题", "q": "锚网支护工在作业中必须佩戴的防护用品包括（ ）。", "answer": "ABC", "opts": [{"label": "A", "text": "安全帽"}, {"label": "B", "text": "防尘口罩"}, {"label": "C", "text": "自救器"}, {"label": "D", "text": "绝缘手套"}]}, {"id": "m14", "type": "multi", "section": "二、多项选择题", "q": "《煤矿安全规程》对锚杆支护的要求包括（ ）。", "answer": "ABC", "opts": [{"label": "A", "text": "及时支护"}, {"label": "B", "text": "紧跟迎头"}, {"label": "C", "text": "质量抽检"}, {"label": "D", "text": "空顶作业"}]}, {"id": "m15", "type": "multi", "section": "二、多项选择题", "q": "下列属于锚网支护工事故应急处理措施的是（ ）。", "answer": "ABC", "opts": [{"label": "A", "text": "立即停止作业并撤离"}, {"label": "B", "text": "向班组长或调度室报告"}, {"label": "C", "text": "在事故区域设置警戒标志"}, {"label": "D", "text": "自行进入危险区抢修设备"}]}, {"id": "m16", "type": "multi", "section": "二、多项选择题", "q": "锚杆支护设计需考虑的主要参数包括（ ）。", "answer": "ABC", "opts": [{"label": "A", "text": "围岩强度"}, {"label": "B", "text": "地应力大小"}, {"label": "C", "text": "巷道断面形状"}, {"label": "D", "text": "施工队伍人数"}]}, {"id": "m17", "type": "multi", "section": "二、多项选择题", "q": "高强锚杆的材质要求包括（ ）。", "answer": "ABC", "opts": [{"label": "A", "text": "抗拉强度≥500MPa"}, {"label": "B", "text": "延伸率≥15%"}, {"label": "C", "text": "杆体直径误差±1mm"}, {"label": "D", "text": "表面镀锌防锈."}]}, {"id": "m18", "type": "multi", "section": "二、多项选择题", "q": "锚网支护作业前必须检查的内容包括（ ）。", "answer": "ABCD", "opts": [{"label": "A", "text": "顶板完整性"}, {"label": "B", "text": "锚杆钻机气路密封性"}, {"label": "C", "text": "作业区域通风情况"}, {"label": "D", "text": "锚固剂有效期"}]}, {"id": "m19", "type": "multi", "section": "二、多项选择题", "q": "下列可能导致锚杆支护失效的原因有（ ）。", "answer": "ABC", "opts": [{"label": "A", "text": "锚杆长度不足"}, {"label": "B", "text": "锚固剂搅拌时间过短"}, {"label": "C", "text": "围岩持续蠕变"}, {"label": "D", "text": "井下温度过低"}]}, {"id": "m20", "type": "multi", "section": "二、多项选择题", "q": "《中华人民共和国安全生产法》规定：安全生产工作应当以人为本，坚持安全发展，坚持（   ）的方针，强化和落实生产经营单位的主体责任，建立生产经营单位负责、职工参与、政府监管、行业自律和社会监督的机制。", "answer": "ABC", "opts": [{"label": "A", "text": "安全第一"}, {"label": "B", "text": "预防为主"}, {"label": "C", "text": "综合治理"}, {"label": "D", "text": "防治结合"}]}, {"id": "m21", "type": "multi", "section": "二、多项选择题", "q": "锚网（索）支护工应严格按本工作面作业规程和支护工操作规程操作，保证锚杆（索）的（   ）等符合《作业规程》要求。", "answer": "ABCD", "opts": [{"label": "A", "text": "间距"}, {"label": "B", "text": "排距"}, {"label": "C", "text": "锚固力"}, {"label": "D", "text": "扭矩"}]}, {"id": "m22", "type": "multi", "section": "二、多项选择题", "q": "锚网（索）支护工在操作钻杆和钻机时，应严格执行（   ），注意站位，防止操作不当导致人员受伤。", "answer": "AB", "opts": [{"label": "A", "text": "“三紧”"}, {"label": "B", "text": "“两不要”"}, {"label": "C", "text": "“四加强”"}, {"label": "D", "text": "“五必须”"}]}, {"id": "m23", "type": "multi", "section": "二、多项选择题", "q": "锚杆支护由锚杆杆体、（   ）、锚固剂、钢带及金属网等物件组成，锚杆支护的作用是由这些构件共同完成的。", "answer": "AB", "opts": [{"label": "A", "text": "托板"}, {"label": "B", "text": "螺母"}, {"label": "C", "text": "力矩扳手"}, {"label": "D", "text": "网丝"}]}, {"id": "m24", "type": "multi", "section": "二、多项选择题", "q": "锚杆支护使用的锚固剂分超快、快速、（   ）。", "answer": "AB", "opts": [{"label": "A", "text": "中速"}, {"label": "B", "text": "慢速"}, {"label": "C", "text": "中快速"}, {"label": "D", "text": "超慢速"}]}, {"id": "m25", "type": "multi", "section": "二、多项选择题", "q": "锚杆“三径”的合理匹配是获得最大锚固力和最佳经济效果的关键，“三径”是指（   ）。", "answer": "ABC", "opts": [{"label": "A", "text": "钻孔直径"}, {"label": "B", "text": "药卷直径"}, {"label": "C", "text": "锚杆直径"}, {"label": "D", "text": "托板直径"}]}, {"id": "m26", "type": "multi", "section": "二、多项选择题", "q": "钢带是锚杆支护系统的重要构件，其作用主要存在以下方面（   ）。", "answer": "BCD", "opts": [{"label": "A", "text": "维护锚杆之间的围岩，防止破碎岩块垮落"}, {"label": "B", "text": "实现锚杆预紧力和阻力扩散，使载荷趋于均匀"}, {"label": "C", "text": "支护巷道表面和改善围岩应力状态作用"}, {"label": "D", "text": "均衡锚杆受力和提高整体支护作用"}]}, {"id": "m27", "type": "multi", "section": "二、多项选择题", "q": "下列属于巷道片帮处理方法的是（   ）。", "answer": "BCD", "opts": [{"label": "A", "text": "木垛法"}, {"label": "B", "text": "挂网法"}, {"label": "C", "text": "撞楔法"}, {"label": "D", "text": "锚网法"}]}, {"id": "m28", "type": "multi", "section": "二、多项选择题", "q": "关于巷道煤层顶板压力的叙述，正确的是（   ）。", "answer": "AC", "opts": [{"label": "A", "text": "煤层顶板暴露的面积越大，煤层顶板压力越大"}, {"label": "B", "text": "煤层顶板悬露时间越长，煤层顶板压力越小"}, {"label": "C", "text": "巷道越宽，煤层顶板压力越大"}, {"label": "D", "text": "煤层顶板越松软、破碎，煤层顶板压力越小"}]}, {"id": "m29", "type": "multi", "section": "二、多项选择题", "q": "锚网支护中金属网的作用叙述正确的是（   ）。", "answer": "ABCD", "opts": [{"label": "A", "text": "维护锚杆之间的围岩，防止破碎岩块垮落"}, {"label": "B", "text": "紧贴巷道表面提供一定的支护力"}, {"label": "C", "text": "有效控制巷道浅部围岩的变形与破坏"}, {"label": "D", "text": "对深部围岩与钢带、锚杆形成系统，有良好的支护作用"}]}, {"id": "m30", "type": "multi", "section": "二、多项选择题", "q": "锚杆支护的原理是（   ）。", "answer": "ABC", "opts": [{"label": "A", "text": "加固拱作用"}, {"label": "B", "text": "悬吊作用"}, {"label": "C", "text": "组合梁作用"}, {"label": "D", "text": "砌体梁作用"}]}, {"id": "m31", "type": "multi", "section": "二、多项选择题", "q": "（   ）属于矿山压力在掘进工作面显现规律。", "answer": "ABCD", "opts": [{"label": "A", "text": "顶板下沉，产生裂隙，局部冒顶或大面积冒顶形式等"}, {"label": "B", "text": "从支架形式观察，支架变形"}, {"label": "C", "text": "底板底鼓，水沟破坏，铁道倾斜"}, {"label": "D", "text": "煤壁和岩壁片帮、断面缩小"}]}, {"id": "m32", "type": "multi", "section": "二、多项选择题", "q": "掘进工作面找顶应遵守的规定是（   ）。", "answer": "BCD", "opts": [{"label": "A", "text": "找顶工作应由一名有经验的工人担任"}, {"label": "B", "text": "找顶人应站在安全地点，观察人应站在找顶人的侧后方，并保证退路畅通"}, {"label": "C", "text": "找顶应从支护完好的地点开始，由外向里，先顶部后两帮依次进行，找顶范围内严禁其他人员进入"}, {"label": "D", "text": "顶帮遇有大块断裂煤矸离层时，应首先设置临时支护，保证安全后，再顺着裂隙、层理慢慢地找下，不得硬刨硬挖"}]}, {"id": "m33", "type": "multi", "section": "二、多项选择题", "q": "煤矿井下冒顶预兆主要有（   ）。", "answer": "ABCD", "opts": [{"label": "A", "text": "顶板响声"}, {"label": "B", "text": "顶板掉渣"}, {"label": "C", "text": "煤壁片帮"}, {"label": "D", "text": "顶板脱层"}]}, {"id": "m34", "type": "multi", "section": "二、多项选择题", "q": "独头巷道维修的原则是（   ）。", "answer": "AB", "opts": [{"label": "A", "text": "由外向里逐架进行"}, {"label": "B", "text": "修复段以里严禁有人"}, {"label": "C", "text": "可以多段作业"}, {"label": "D", "text": "修复时可以多人作业"}]}, {"id": "m35", "type": "multi", "section": "二、多项选择题", "q": "围岩的稳定性主要取决于岩体的（   ）。", "answer": "BC", "opts": [{"label": "A", "text": "密度"}, {"label": "B", "text": "结构"}, {"label": "C", "text": "强度"}, {"label": "D", "text": "颜色"}]}, {"id": "m36", "type": "multi", "section": "二、多项选择题", "q": "锚杆支护基本支护形式是指巷道（   ），其他支护形式参照基本支护形式执行。", "answer": "ABC", "opts": [{"label": "A", "text": "单体锚杆支护"}, {"label": "B", "text": "锚网支护"}, {"label": "C", "text": "锚网带（梁）支护"}, {"label": "D", "text": "工字钢棚支护"}]}, {"id": "m37", "type": "multi", "section": "二、多项选择题", "q": "锚杆（索）支护工必须掌握《作业规程》中规定的（   ）等。", "answer": "ABCD", "opts": [{"label": "A", "text": "巷道断面"}, {"label": "B", "text": "支护方式"}, {"label": "C", "text": "支护技术参数"}, {"label": "D", "text": "质量标准"}]}, {"id": "m38", "type": "multi", "section": "二、多项选择题", "q": "打锚杆眼时，锚杆眼的（   ）、方向等，必须符合《作业规程》规定。", "answer": "ABCD", "opts": [{"label": "A", "text": "直径"}, {"label": "B", "text": "间距"}, {"label": "C", "text": "排距"}, {"label": "D", "text": "深度"}]}, {"id": "m39", "type": "multi", "section": "二、多项选择题", "q": "在安装锚杆前，应按照《作业规程》规定的树脂药卷（   ），用锚杆杆体将药卷轻推入孔。", "answer": "ABC", "opts": [{"label": "A", "text": "型号"}, {"label": "B", "text": "数量"}, {"label": "C", "text": "顺序"}, {"label": "D", "text": "重量"}]}, {"id": "j0", "type": "judge", "section": "三、判断题", "q": "煤矿企业必须为从业人员提供符合标准的劳动防护用品。", "answer": "√"}, {"id": "j1", "type": "judge", "section": "三、判断题", "q": "井下锚网支护工无需持证上岗，只需通过内部培训即可.", "answer": "×"}, {"id": "j2", "type": "judge", "section": "三、判断题", "q": "《安全生产法》规定，从业人员有权拒绝违章指挥和强令冒险作业。", "answer": "√"}, {"id": "j3", "type": "judge", "section": "三、判断题", "q": "煤矿企业可自行决定是否关闭存在重大安全隐患的作业区域.", "answer": "×"}, {"id": "j4", "type": "judge", "section": "三、判断题", "q": "锚杆支护设计变更需经总工程师批准后方可实施。", "answer": "√"}, {"id": "j5", "type": "judge", "section": "三、判断题", "q": "煤矿企业必须依法为职工缴纳工伤保险。", "answer": "√"}, {"id": "j6", "type": "judge", "section": "三、判断题", "q": "锚网支护作业前无需检查顶板情况，直接施工即可.", "answer": "×"}, {"id": "j7", "type": "judge", "section": "三、判断题", "q": "《煤矿安全规程》要求，锚杆预紧力必须达到设计要求。", "answer": "√"}, {"id": "j8", "type": "judge", "section": "三、判断题", "q": "发生顶板事故时，现场人员应第一时间撤离并报告。", "answer": "√"}, {"id": "j9", "type": "judge", "section": "三、判断题", "q": "未进行安全技术措施交底的作业人员有权拒绝施工。", "answer": "√"}, {"id": "j10", "type": "judge", "section": "三、判断题", "q": "井下使用不合格的锚固剂属于重大安全隐患。", "answer": "√"}, {"id": "j11", "type": "judge", "section": "三、判断题", "q": "锚网支护工在作业中发现顶板异常，应立即停止作业并上报。", "answer": "√"}, {"id": "j12", "type": "judge", "section": "三、判断题", "q": "煤矿企业可临时聘用无证人员从事锚杆支护作业.", "answer": "×"}, {"id": "j13", "type": "judge", "section": "三、判断题", "q": "《职业病防治法》要求企业定期组织职业健康检查。", "answer": "√"}, {"id": "j14", "type": "judge", "section": "三、判断题", "q": "锚杆支护质量验收不合格时，必须返工直至达标。", "answer": "√"}, {"id": "j15", "type": "judge", "section": "三、判断题", "q": "锚网支护作业前必须执行“敲帮问顶”制度。", "answer": "√"}, {"id": "j16", "type": "judge", "section": "三、判断题", "q": "锚杆安装角度允许偏差为±5°。", "answer": "√"}, {"id": "j17", "type": "judge", "section": "三、判断题", "q": "锚杆托盘必须紧贴岩面，不得有松动。", "answer": "√"}, {"id": "j18", "type": "judge", "section": "三、判断题", "q": "锚索张拉完成后，需在24小时内进行二次补张。", "answer": "√"}, {"id": "j19", "type": "judge", "section": "三、判断题", "q": "锚网支护作业时，可单人独立操作.", "answer": "×"}, {"id": "j20", "type": "judge", "section": "三、判断题", "q": "锚杆孔深不足时，可用锚固剂填充弥补.", "answer": "×"}, {"id": "j21", "type": "judge", "section": "三、判断题", "q": "锚杆支护后需进行拉拔力测试，抽检率不低于10%。", "answer": "√"}, {"id": "j22", "type": "judge", "section": "三、判断题", "q": "锚网支护工需随身携带力矩扳手检测锚杆预紧力。", "answer": "√"}, {"id": "j23", "type": "judge", "section": "三、判断题", "q": "锚杆间排距误差不得超过设计值的±100mm。", "answer": "√"}, {"id": "j24", "type": "judge", "section": "三、判断题", "q": "锚固剂搅拌时间不足会导致锚固失效。", "answer": "√"}, {"id": "j25", "type": "judge", "section": "三、判断题", "q": "锚网支护完成后，需及时清理现场浮矸和杂物。", "answer": "√"}, {"id": "j26", "type": "judge", "section": "三、判断题", "q": "锚杆钻孔应垂直于岩面，偏差不超过5°。", "answer": "√"}, {"id": "j27", "type": "judge", "section": "三、判断题", "q": "锚索安装后外露长度不得超过300mm。", "answer": "√"}, {"id": "j28", "type": "judge", "section": "三、判断题", "q": "锚网支护工需定期检查锚杆支护区域的顶板下沉量。", "answer": "√"}, {"id": "j29", "type": "judge", "section": "三、判断题", "q": "锚杆支护作业时，必须佩戴防尘口罩和防护手套。", "answer": "√"}, {"id": "j30", "type": "judge", "section": "三、判断题", "q": "树脂锚固剂的固化时间与环境温度无关.", "answer": "×"}, {"id": "j31", "type": "judge", "section": "三、判断题", "q": "锚杆支护的作用原理包括悬吊作用、组合梁作用和挤压加固作用。", "answer": "√"}, {"id": "j32", "type": "judge", "section": "三、判断题", "q": "高强锚杆的杆体材料抗拉强度不低于500MPa。", "answer": "√"}, {"id": "j33", "type": "judge", "section": "三、判断题", "q": "锚杆支护设计中，锚杆长度应大于潜在破碎区厚度。", "answer": "√"}, {"id": "j34", "type": "judge", "section": "三、判断题", "q": "锚杆预紧力不足会导致支护结构整体刚度下降。", "answer": "√"}, {"id": "j35", "type": "judge", "section": "三、判断题", "q": "锚索的破断力应大于其设计承载力的1.5倍。", "answer": "√"}, {"id": "j36", "type": "judge", "section": "三、判断题", "q": "锚杆支护的“三径匹配”指钻孔直径、锚杆直径和锚固剂直径的匹配。", "answer": "√"}, {"id": "j37", "type": "judge", "section": "三、判断题", "q": "树脂锚固剂的凝胶时间应控制通常在1-3分钟以内。", "answer": "√"}, {"id": "j38", "type": "judge", "section": "三、判断题", "q": "锚杆支护中，钢带的作用是均匀分布锚杆受力。", "answer": "√"}, {"id": "j39", "type": "judge", "section": "三、判断题", "q": "锚杆支护设计需考虑围岩强度、地应力和巷道断面形状。", "answer": "√"}, {"id": "j40", "type": "judge", "section": "三、判断题", "q": "锚杆支护中，“三径匹配”指钻孔直径、锚杆直径和锚固剂直径需合理配合。", "answer": "√"}, {"id": "j41", "type": "judge", "section": "三、判断题", "q": "树脂锚固剂的储存温度储存温度一般要求≤30℃，避免高温和潮湿，否则会失效。", "answer": "√"}, {"id": "j42", "type": "judge", "section": "三、判断题", "q": "锚杆支护的“悬吊理论”适用于直接顶较薄且存在稳定老顶的地质条件。", "answer": "√"}, {"id": "j43", "type": "judge", "section": "三、判断题", "q": "锚杆预紧力越高，支护结构的抗变形能力越强。", "answer": "√"}, {"id": "j44", "type": "judge", "section": "三、判断题", "q": "锚索支护时，锚固段应深入稳定岩层，超出滑移面。", "answer": "√"}, {"id": "j45", "type": "judge", "section": "三、判断题", "q": "钢带与网片连接时，必须全部连接，确保受力均匀。", "answer": "√"}, {"id": "j46", "type": "judge", "section": "三、判断题", "q": "锚杆支护设计时，锚杆长度需根据围岩破碎深度确定，与巷道宽度无直接比例关系", "answer": "√"}, {"id": "j47", "type": "judge", "section": "三、判断题", "q": "锚杆钻孔时，若遇到断层破碎带需增加锚杆密度或采取加强支护", "answer": "√"}, {"id": "j48", "type": "judge", "section": "三、判断题", "q": "树脂锚固剂的凝胶时间指开始混合到失去流动性的时间，固化时间更长", "answer": "√"}, {"id": "j49", "type": "judge", "section": "三、判断题", "q": "锚杆支护后，若发现托盘变形可能因预紧力不足或围岩变形过大导致", "answer": "√"}, {"id": "j50", "type": "judge", "section": "三、判断题", "q": "锚杆（索）支护工必须经过专门技术培训，考试合格并取得安全资格证后持证上岗。", "answer": "√"}, {"id": "j51", "type": "judge", "section": "三、判断题", "q": "锚杆（索）支护工应掌握支护机具的结构、性能、工作原理和使用方法，具备支护机具的一般检查维修处理技能，能正确使用支护设备。", "answer": "√"}, {"id": "j52", "type": "judge", "section": "三、判断题", "q": "锚杆（索）支护工应做好作业区域的事故隐患排查和处理工作。", "answer": "√"}, {"id": "j53", "type": "judge", "section": "三、判断题", "q": "锚杆（索）支护工必持证上岗且岗证相符，是本岗位安全生产工作的直接责任者。", "answer": "√"}, {"id": "j54", "type": "judge", "section": "三、判断题", "q": "锚杆（索）支护工在作业前应对打孔机具、风水管路及其连接部位进行全面检查、处理，确保作业机具安全完好。", "answer": "√"}, {"id": "j55", "type": "judge", "section": "三、判断题", "q": "锚杆（索）支护工应严格执行“敲帮问顶”制度，注意站位，防止作业场所内的活矸、危岩、松动的煤（岩）体发生掉落、片帮、冒顶等事故伤人。", "answer": "√"}, {"id": "j56", "type": "judge", "section": "三、判断题", "q": "锚杆（索）支护工在作业前应认真检查处理临时支护，防止使用不规范导致掉落伤人。", "answer": "√"}, {"id": "j57", "type": "judge", "section": "三、判断题", "q": "掘进工作面发生冒顶、出水事故时，巷道内作业人员应注意观察，及时撤离并汇报。", "answer": "√"}, {"id": "j58", "type": "judge", "section": "三、判断题", "q": "锚杆（索）支护工在进行钻眼时应注意站位，禁止踩空或骑气腿上钻眼，防止钻杆、风钻折断或扑倒时人员站位不当受伤。", "answer": "√"}, {"id": "j59", "type": "judge", "section": "三、判断题", "q": "锚杆（索）支护工应认真检查风水管路及接头完好情况，防止管路不完好导致崩伤人员事故的发生。", "answer": "√"}, {"id": "j60", "type": "judge", "section": "三、判断题", "q": "掘进工作面必须执行一循环一支护的掘支方式，不得超循环，多循环作业，不得滞后循环支护。", "answer": "√"}, {"id": "j61", "type": "judge", "section": "三、判断题", "q": "掘进工作面进行永久支护，不论是锚杆（索）支护，还是架棚等支护作业时，必须在有临时支护的情况下进行，严禁空顶作业。", "answer": "√"}, {"id": "j62", "type": "judge", "section": "三、判断题", "q": "掘进工作面采取了可靠的临时支护后，在作业过程中，可以不再观察顶板和煤帮，就可安全无事。", "answer": "×"}, {"id": "j63", "type": "judge", "section": "三、判断题", "q": "掘进机割一循环后，在“敲帮问顶”完成后，机组不需要退机，可以借助切割头，在切割头上或机身上进行支护等作业。", "answer": "×"}, {"id": "j64", "type": "judge", "section": "三、判断题", "q": "掘进工作面在进行锚杆（索）支护作业时，工作面同时进行作业的钻机不得超过两台。", "answer": "√"}, {"id": "j65", "type": "judge", "section": "三、判断题", "q": "掘进机割煤工序完成后，可以不退机，只需对切割头进行防护后，就可以进行支护工序。", "answer": "×"}, {"id": "j66", "type": "judge", "section": "三、判断题", "q": "掘进机切割头在割煤完成后，要先退机随即切割头落地，但机组可以不停电闭锁。", "answer": "×"}, {"id": "j67", "type": "judge", "section": "三、判断题", "q": "在掘进工作面顶板良好的情况下，可以先打帮锚杆，后打顶锚杆。", "answer": "×"}, {"id": "j68", "type": "judge", "section": "三、判断题", "q": "掘进割煤完成一循环后，必须由班组长在安全位置先检查割煤成型情况和顶板、煤帮安全质量情况，确认后，进行临时超前支护，待超前临时支护确认安全完成后，方可允许人员进入支护作业。", "answer": "√"}, {"id": "j69", "type": "judge", "section": "三、判断题", "q": "采用锚杆吊挂穿管临时支护时必须牢靠，保证超前距、间距符合《规程》要求，并保证有效接顶，必要情况下要用背顶材料辅助接顶。", "answer": "√"}];
+const userAnswers = {};
+let answeredCount = 0;
+
+document.getElementById('total-count').textContent = QUESTIONS.length;
+
+function updateProgress() {
+  const pct = (answeredCount / QUESTIONS.length * 100).toFixed(1);
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('answered-count').textContent = answeredCount;
+}
+
+function buildQuiz() {
+  const container = document.getElementById('quiz-container');
+  let lastSection = '';
+  QUESTIONS.forEach((q, idx) => {
+    if (q.section !== lastSection) {
+      lastSection = q.section;
+      const st = document.createElement('div');
+      st.className = 'section-title';
+      st.textContent = q.section;
+      container.appendChild(st);
+    }
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = 'card-' + q.id;
+
+    const badgeMap = {single:'单选', multi:'多选', judge:'判断'};
+    const badgeClass = {single:'badge-single', multi:'badge-multi', judge:'badge-judge'};
+    card.innerHTML = `
+      <div>
+        <span class="q-num">${idx+1}</span>
+        <span class="q-type-badge ${badgeClass[q.type]}">${badgeMap[q.type]}</span>
+      </div>
+      <div class="q-text">${q.q}</div>
+    `;
+
+    if (q.type === 'single') {
+      const opts = document.createElement('div');
+      opts.className = 'options';
+      q.opts.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.dataset.val = opt.label;
+        btn.innerHTML = `<span class="option-label">${opt.label}</span><span>${opt.text}</span>`;
+        btn.onclick = () => answerSingle(q.id, opt.label, q.answer, btn, opts);
+        opts.appendChild(btn);
+      });
+      card.appendChild(opts);
+    } else if (q.type === 'multi') {
+      const hint = document.createElement('div');
+      hint.className = 'multi-hint';
+      hint.textContent = '（多选题，请选择所有正确选项）';
+      card.appendChild(hint);
+      const opts = document.createElement('div');
+      opts.className = 'options';
+      q.opts.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.dataset.val = opt.label;
+        btn.dataset.selected = '0';
+        btn.innerHTML = `<span class="option-label">${opt.label}</span><span>${opt.text}</span>`;
+        btn.onclick = () => toggleMulti(btn, q.id);
+        opts.appendChild(btn);
+      });
+      card.appendChild(opts);
+      const confirmWrap = document.createElement('div');
+      confirmWrap.className = 'multi-confirm-wrap';
+      confirmWrap.id = 'confirm-' + q.id;
+      const confirmBtn = document.createElement('button');
+      confirmBtn.className = 'multi-confirm-btn';
+      confirmBtn.textContent = '确认提交本题';
+      confirmBtn.id = 'cbtn-' + q.id;
+      confirmBtn.disabled = true;
+      confirmBtn.onclick = () => answerMulti(q.id, q.answer, opts, confirmBtn);
+      confirmWrap.appendChild(confirmBtn);
+      card.appendChild(confirmWrap);
+    } else if (q.type === 'judge') {
+      const opts = document.createElement('div');
+      opts.className = 'judge-opts';
+      ['√','×'].forEach(val => {
+        const btn = document.createElement('button');
+        btn.className = 'judge-btn';
+        btn.textContent = val;
+        btn.dataset.val = val;
+        btn.onclick = () => answerJudge(q.id, val, q.answer, btn, opts);
+        opts.appendChild(btn);
+      });
+      card.appendChild(opts);
+    }
+
+    const fb = document.createElement('div');
+    fb.className = 'feedback';
+    fb.id = 'fb-' + q.id;
+    card.appendChild(fb);
+    container.appendChild(card);
+  });
+}
+
+function showFeedback(id, correct, correctAnswer) {
+  const fb = document.getElementById('fb-' + id);
+  fb.className = 'feedback show ' + (correct ? 'ok' : 'fail');
+  fb.innerHTML = correct
+    ? '✅ 回答正确！'
+    : `❌ 回答错误，正确答案：<strong>${correctAnswer}</strong>`;
+}
+
+function answerSingle(id, val, answer, btn, opts) {
+  if (userAnswers[id] !== undefined) return;
+  userAnswers[id] = val;
+  answeredCount++;
+  updateProgress();
+  const correct = val === answer;
+  opts.querySelectorAll('.option-btn').forEach(b => {
+    b.disabled = true;
+    if (b.dataset.val === answer) b.classList.add('correct');
+    else if (b.dataset.val === val && !correct) b.classList.add('wrong');
+  });
+  showFeedback(id, correct, answer);
+  document.getElementById('card-' + id).classList.add('answered');
+}
+
+function toggleMulti(btn, id) {
+  if (userAnswers[id] !== undefined) return;
+  const sel = btn.dataset.selected === '1';
+  btn.dataset.selected = sel ? '0' : '1';
+  btn.classList.toggle('selected', !sel);
+  const opts = btn.closest('.options');
+  const anySelected = opts.querySelectorAll('[data-selected="1"]').length > 0;
+  document.getElementById('cbtn-' + id).disabled = !anySelected;
+}
+
+function answerMulti(id, answer, opts, confirmBtn) {
+  if (userAnswers[id] !== undefined) return;
+  const selected = Array.from(opts.querySelectorAll('[data-selected="1"]'))
+    .map(b => b.dataset.val).sort().join('');
+  const sortedAnswer = answer.replace(/\s/g,'').split('').sort().join('');
+  userAnswers[id] = selected;
+  answeredCount++;
+  updateProgress();
+  const correct = selected === sortedAnswer;
+  const correctSet = new Set(sortedAnswer.split(''));
+  opts.querySelectorAll('.option-btn').forEach(b => {
+    b.disabled = true;
+    const isCorrect = correctSet.has(b.dataset.val);
+    const isSelected = b.dataset.selected === '1';
+    if (isCorrect) b.classList.add('correct');
+    else if (isSelected) b.classList.add('wrong');
+  });
+  confirmBtn.disabled = true;
+  showFeedback(id, correct, answer.replace(/\s/g,''));
+  document.getElementById('card-' + id).classList.add('answered');
+}
+
+function answerJudge(id, val, answer, btn, opts) {
+  if (userAnswers[id] !== undefined) return;
+  userAnswers[id] = val;
+  answeredCount++;
+  updateProgress();
+  const correct = val === answer;
+  opts.querySelectorAll('.judge-btn').forEach(b => {
+    b.disabled = true;
+    if (b.dataset.val === answer) b.classList.add('correct');
+    else if (b.dataset.val === val && !correct) b.classList.add('wrong');
+  });
+  showFeedback(id, correct, answer);
+  document.getElementById('card-' + id).classList.add('answered');
+}
+
+function submitQuiz() {
+  let correct = 0, unanswered = 0;
+  let singleC=0,singleT=0,multiC=0,multiT=0,judgeC=0,judgeT=0;
+  QUESTIONS.forEach(q => {
+    if (userAnswers[q.id] === undefined) { unanswered++; return; }
+    let isCorrect = false;
+    if (q.type === 'single') {
+      singleT++;
+      isCorrect = userAnswers[q.id] === q.answer;
+      if(isCorrect) singleC++;
+    } else if (q.type === 'multi') {
+      multiT++;
+      const sortedAnswer = q.answer.replace(/\s/g,'').split('').sort().join('');
+      isCorrect = userAnswers[q.id].split('').sort().join('') === sortedAnswer;
+      if(isCorrect) multiC++;
+    } else {
+      judgeT++;
+      isCorrect = userAnswers[q.id] === q.answer;
+      if(isCorrect) judgeC++;
+    }
+    if (isCorrect) correct++;
+  });
+  const total = QUESTIONS.length - unanswered;
+  const score = total > 0 ? Math.round(correct / QUESTIONS.length * 100) : 0;
+  document.getElementById('res-score').textContent = score;
+  document.getElementById('res-total').textContent = '/ 100 分';
+  let grade = '';
+  if (score >= 90) grade = '🏆 优秀！';
+  else if (score >= 80) grade = '👍 良好';
+  else if (score >= 60) grade = '✅ 及格';
+  else grade = '❌ 需加强练习';
+  document.getElementById('res-grade').textContent = grade;
+  document.getElementById('res-detail').innerHTML =
+    `共 ${QUESTIONS.length} 题，已答 ${QUESTIONS.length - unanswered} 题，答对 ${correct} 题<br>` +
+    `单选：${singleC}/${singleT} &nbsp; 多选：${multiC}/${multiT} &nbsp; 判断：${judgeC}/${judgeT}` +
+    (unanswered > 0 ? `<br><span style="color:#e53935">⚠️ 还有 ${unanswered} 题未作答</span>` : '');
+  document.getElementById('result-modal').classList.add('show');
+
+  // Also reveal answers for unanswered questions
+  QUESTIONS.forEach(q => {
+    if (userAnswers[q.id] !== undefined) return;
+    const card = document.getElementById('card-' + q.id);
+    if (q.type === 'single') {
+      card.querySelectorAll('.option-btn').forEach(b => {
+        b.disabled = true;
+        if (b.dataset.val === q.answer) b.classList.add('show-correct');
+      });
+    } else if (q.type === 'multi') {
+      const correctSet = new Set(q.answer.replace(/\s/g,'').split(''));
+      card.querySelectorAll('.option-btn').forEach(b => {
+        b.disabled = true;
+        if (correctSet.has(b.dataset.val)) b.classList.add('show-correct');
+      });
+      const cb = document.getElementById('cbtn-' + q.id);
+      if (cb) cb.disabled = true;
+    } else {
+      card.querySelectorAll('.judge-btn').forEach(b => {
+        b.disabled = true;
+        if (b.dataset.val === q.answer) b.classList.add('show-correct');
+      });
+    }
+    const fb = document.getElementById('fb-' + q.id);
+    fb.className = 'feedback show fail';
+    fb.innerHTML = `⬜ 未作答，正确答案：<strong>${q.answer.replace(/\s/g,'')}</strong>`;
+  });
+}
+
+buildQuiz();
+updateProgress();
+</script>
+</body>
+</html>
