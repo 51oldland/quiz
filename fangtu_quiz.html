@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>煤矿特殊工种防突工考试题库</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif;background:#f5f6fa;color:#333;font-size:15px;min-height:100vh}
+.header{background:linear-gradient(135deg,#1a73e8,#0d5bba);color:#fff;padding:16px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.header h1{font-size:16px;font-weight:700;margin-bottom:4px}
+.header .progress-info{font-size:12px;opacity:.9}
+.progress-bar-wrap{background:rgba(255,255,255,.3);border-radius:10px;height:6px;margin-top:8px}
+.progress-bar{background:#fff;border-radius:10px;height:6px;transition:width .3s ease;width:0%}
+.section-title{background:#e8f0fe;color:#1a73e8;font-size:13px;font-weight:700;padding:10px 16px;margin-top:12px;border-left:4px solid #1a73e8}
+.question-card{background:#fff;margin:8px 12px;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.08);transition:box-shadow .2s}
+.question-card.answered{box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.q-num{display:inline-block;background:#1a73e8;color:#fff;font-size:12px;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:8px}
+.q-type-badge{display:inline-block;font-size:11px;padding:1px 6px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.badge-single{background:#e3f2fd;color:#1565c0}
+.badge-multi{background:#fce4ec;color:#c62828}
+.badge-judge{background:#e8f5e9;color:#2e7d32}
+.q-text{font-size:15px;line-height:1.6;margin-bottom:12px;color:#222}
+.options{display:flex;flex-direction:column;gap:8px}
+.option-btn{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;border:1.5px solid #e0e0e0;background:#fafafa;cursor:pointer;transition:all .15s;text-align:left;font-size:14px;line-height:1.5;width:100%}
+.option-btn:active{transform:scale(.98)}
+.option-btn.selected{border-color:#1a73e8;background:#e8f0fe}
+.option-btn.correct{border-color:#43a047;background:#e8f5e9;color:#2e7d32}
+.option-btn.wrong{border-color:#e53935;background:#ffebee;color:#c62828}
+.option-btn.show-correct{border-color:#43a047;background:#e8f5e9;color:#2e7d32;opacity:.8}
+.option-label{min-width:24px;height:24px;border-radius:50%;background:#e0e0e0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+.option-btn.correct .option-label{background:#43a047;color:#fff}
+.option-btn.wrong .option-label{background:#e53935;color:#fff}
+.option-btn.show-correct .option-label{background:#43a047;color:#fff}
+.option-btn.selected .option-label{background:#1a73e8;color:#fff}
+.judge-opts{display:flex;gap:10px}
+.judge-btn{flex:1;padding:12px;border-radius:10px;border:1.5px solid #e0e0e0;background:#fafafa;cursor:pointer;text-align:center;font-size:18px;transition:all .15s}
+.judge-btn.selected{border-color:#1a73e8;background:#e8f0fe}
+.judge-btn.correct{border-color:#43a047;background:#e8f5e9}
+.judge-btn.wrong{border-color:#e53935;background:#ffebee}
+.judge-btn.show-correct{border-color:#43a047;background:#e8f5e9;opacity:.8}
+.feedback{display:none;margin-top:10px;padding:8px 12px;border-radius:8px;font-size:13px;font-weight:600}
+.feedback.show{display:flex;align-items:center;gap:6px}
+.feedback.ok{background:#e8f5e9;color:#2e7d32}
+.feedback.fail{background:#ffebee;color:#c62828}
+.multi-hint{font-size:12px;color:#888;margin-bottom:8px}
+.multi-confirm-wrap{margin-top:10px}
+.multi-confirm-btn{background:#1a73e8;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:14px;cursor:pointer;width:100%}
+.multi-confirm-btn:disabled{background:#bdbdbd;cursor:default}
+.submit-wrap{padding:20px 16px 40px;text-align:center}
+.submit-btn{background:linear-gradient(135deg,#1a73e8,#0d5bba);color:#fff;border:none;border-radius:14px;padding:16px 48px;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(26,115,232,.4);width:100%;max-width:320px}
+.submit-btn:active{transform:scale(.97)}
+.result-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center}
+.result-modal.show{display:flex}
+.result-box{background:#fff;border-radius:20px;padding:32px 24px;text-align:center;width:88%;max-width:340px;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.result-score{font-size:56px;font-weight:800;color:#1a73e8;line-height:1}
+.result-total{font-size:16px;color:#888;margin-top:4px}
+.result-grade{font-size:22px;font-weight:700;margin:16px 0 8px}
+.result-detail{font-size:13px;color:#555;line-height:1.8;margin:12px 0 20px;background:#f5f6fa;border-radius:10px;padding:12px}
+.result-close{background:#1a73e8;color:#fff;border:none;border-radius:10px;padding:12px 32px;font-size:15px;cursor:pointer;margin-top:4px}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>煤矿特殊工种防突工考试题库</h1>
+  <div class="progress-info">已答 <span id="answered-count">0</span> / <span id="total-count">0</span> 题</div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar"></div></div>
+</div>
+<div id="quiz-container"></div>
+<div class="submit-wrap">
+  <button class="submit-btn" onclick="submitQuiz()">提交答卷 · 查看成绩</button>
+</div>
+<div class="result-modal" id="result-modal">
+  <div class="result-box">
+    <div style="font-size:13px;color:#888;margin-bottom:8px">答题结果</div>
+    <div class="result-score" id="res-score">0</div>
+    <div class="result-total" id="res-total">/ 0 分</div>
+    <div class="result-grade" id="res-grade"></div>
+    <div class="result-detail" id="res-detail"></div>
+    <button class="result-close" onclick="document.getElementById('result-modal').classList.remove('show')">关闭</button>
+  </div>
+</div>
+<script>
+const QUESTIONS = [{"id": "j1", "type": "judge", "section": "第一章 判断题（每题2分，共60分）", "q": "煤矿企业要保证“安全第一，预防为主，综合治理”方针的具体落实，必须严格执行《煤矿安全规程》等相关规定。", "answer": "√", "score": 2}, {"id": "j2", "type": "judge", "section": "第一章 判断题（每题2分，共60分）", "q": "煤矿安全监察机构依法行使职权，不受任何组织和个人的非法干涉。", "answer": "√", "score": 2}, {"id": "j3", "type": "judge", "section": "第一章 判断题（每题2分，共60分）", "q": "煤矿没有领导带班下井的，煤矿从业人员有权拒绝下井作业。", "answer": "√", "score": 2}, {"id": "j4", "type": "judge", "section": "第一章 判断题（每题2分，共60分）", "q": "生产经营单位的从业人员不服从管理，违反安全生产规章制度或者操作规程的，由生产经营单位给予批评教育，依照有关规章制度给予处分。", "answer": "√", "score": 2}, {"id": "j5", "type": "judge", "section": "第一章 判断题（每题2分，共60分）", "q": "生产经营单位可以不把作业场所和工作岗位存在的危险因素如实告知从业人员，以免产生负面影响，不利于生产。", "answer": "×", "score": 2}, {"id": "j6", "type": "judge", "section": "第一章 判断题（每题2分，共60分）", "q": "按粉尘存在状态可以分成浮尘和落尘。浮尘的危害最大。", "answer": "√", "score": 2}, {"id": "j7", "type": "judge", "section": "第一章 判断题（每题2分，共60分）", "q": "当混合气体中瓦斯浓度大于16%时，仍然会燃烧和爆炸。", "answer": "×", "score": 2}, {"id": "j8", "type": "judge", "section": "第一章 判断题（每题2分，共60分）", "q": "井下用风地点的回风再次进入其他用风地点的通风方式称为串联通风。", "answer": "√", "score": 2}, {"id": "j9", "type": "judge", "section": "第一章 判断题（每题2分，共60分）", "q": "井下主要水泵房、井下中央变电所、矿井地面变电所和地面通风机房的电话，应能与矿调度室直接联系。", "answer": "√", "score": 2}, {"id": "j10", "type": "judge", "section": "第一章 判断题（每题2分，共60分）", "q": "掘进工作面断面小、落煤量小，瓦斯涌出量也相对较小，发生瓦斯事故的可能性也较小。", "answer": "×", "score": 2}, {"id": "j11", "type": "judge", "section": "第一章 判断题（每题2分，共60分）", "q": "矿井通风可以采用局部通风机或风机群作为主要通风机使用。", "answer": "×", "score": 2}, {"id": "j12", "type": "judge", "section": "第一章 判断题（每题2分，共60分）", "q": "掘进巷道可以使用3台以上（含3台）的局部通风机同时向1个掘进工作面供风。", "answer": "×", "score": 2}, {"id": "j13", "type": "judge", "section": "第一章 判断题（每题2分，共60分）", "q": "矿井瓦斯是煤岩涌出的各种气体的总称，其主要成分是甲烷，有时也专指甲烷一种气体。", "answer": "√", "score": 2}, {"id": "j14", "type": "judge", "section": "第一章 判断题（每题2分，共60分）", "q": "矿井有下列情况之一的，应当立即进行突出煤层鉴定；鉴定未完成前，应当按照突出煤层管理。①煤层有瓦斯动力现象的；②相邻矿井开采的同一煤层发生突出的；③煤层瓦斯压力达到或者超过0.74MPa的。", "answer": "√", "score": 2}, {"id": "j15", "type": "judge", "section": "第一章 判断题（每题2分，共60分）", "q": "在突出煤层中未进行区域预测的区域视为突出危险区。", "answer": "√", "score": 2}, {"id": "j16", "type": "judge", "section": "第一章 判断题（每题2分，共60分）", "q": "石门揭穿煤层是突出矿井最危险的工序，发生突出的概率多、强度大、危险性高。", "answer": "√", "score": 2}, {"id": "j17", "type": "judge", "section": "第一章 判断题（每题2分，共60分）", "q": "区域防突工作应当做到多措并举、可保必保、应抽尽抽、效果达标。", "answer": "√", "score": 2}, {"id": "j18", "type": "judge", "section": "第一章 判断题（每题2分，共60分）", "q": "突出矿井应当对突出煤层进行区域突出危险性预测。经区域预测后，突出煤层划分为突出危险区和无突出危险区。", "answer": "√", "score": 2}, {"id": "j19", "type": "judge", "section": "第一章 判断题（每题2分，共60分）", "q": "开拓后区域预测时，同一地质单元内沿煤层走向布置测试点不少于2个，沿倾向不少于3个。", "answer": "√", "score": 2}, {"id": "j20", "type": "judge", "section": "第一章 判断题（每题2分，共60分）", "q": "水力冲孔是在采掘之前，利用钻机高压水射流在突出煤层内冲出煤炭形成较大孔洞，诱导可控制的小型突出，以造成煤体卸压，加速瓦斯排放，降低瓦斯含量和瓦斯压力，消除采掘突出危险性的一种局部防突措施。", "answer": "√", "score": 2}, {"id": "j21", "type": "judge", "section": "第一章 判断题（每题2分，共60分）", "q": "在煤层赋存条件和地质构造条件变化不大时，同一煤层在同一深度的各个地点，煤层瓦斯压力相近。", "answer": "√", "score": 2}, {"id": "j22", "type": "judge", "section": "第一章 判断题（每题2分，共60分）", "q": "开拓后区域预测所依据的煤层瓦斯压力、瓦斯含量等参数应为井下实测数据。", "answer": "√", "score": 2}, {"id": "j23", "type": "judge", "section": "第一章 判断题（每题2分，共60分）", "q": "WTC瓦斯突出参数仪是采用等温解吸法，通过连续自动测定煤样罐中瓦斯解吸压力，计算煤样的瓦斯解吸特征指标K1，结合弹簧秤测定的钻粉量指标，判定突出危险工作面。", "answer": "√", "score": 2}, {"id": "j24", "type": "judge", "section": "第一章 判断题（每题2分，共60分）", "q": "煤层透气性系数是衡量瓦斯等气体在煤层内流动难易程度的物理量，用λ表示，单位为m²/(MPa²·d)。", "answer": "√", "score": 2}, {"id": "j25", "type": "judge", "section": "第一章 判断题（每题2分，共60分）", "q": "当测定的综合指标D、K都小于临界值，或者指标K小于临界值且D计算式中两括号内的计算值都为负值时，若未发现其他异常情况，该工作面即为无突出危险工作面；否则判定为突出危险工作面。", "answer": "√", "score": 2}, {"id": "j26", "type": "judge", "section": "第一章 判断题（每题2分，共60分）", "q": "采用复合指标法预测煤巷掘进工作面突出危险性时，如果实测得到的指标q、S的所有测定值均小于临界值，并且未发现其他异常情况，则该工作面预测为无突出危险工作面；否则，为突出危险工作面。", "answer": "√", "score": 2}, {"id": "j27", "type": "judge", "section": "第一章 判断题（每题2分，共60分）", "q": "采用R值指标法预测煤巷掘进工作面突出危险性时，在近水平、缓倾斜煤层工作面应向前方煤体至少施工3个、在倾斜或急倾斜煤层至少施工2个直径42mm、孔深8~10m的钻孔，测定钻孔瓦斯涌出初速度和钻屑量指标。", "answer": "√", "score": 2}, {"id": "j28", "type": "judge", "section": "第一章 判断题（每题2分，共60分）", "q": "K1的物理意义是：煤样自煤体脱落暴露于大气之中解吸第一分钟内，每克煤样的瓦斯解吸总量，单位为mL/(min½·g)。", "answer": "√", "score": 2}, {"id": "j29", "type": "judge", "section": "第一章 判断题（每题2分，共60分）", "q": "△h2的物理意义是：煤样（10g）自煤体脱落暴露于大气之中第四分钟和第五分钟的瓦斯解吸总量，单位为Pa。", "answer": "√", "score": 2}, {"id": "j30", "type": "judge", "section": "第一章 判断题（每题2分，共60分）", "q": "采用钻屑指标预测某突出煤层，最浅钻孔的间煤深度没有关系。", "answer": "×", "score": 2}, {"id": "s1", "type": "single", "section": "第二章 单选题（每题1分，共20分）", "q": "坚持“管理、（ ）培训并重”是我国煤矿安全生产工作的基本原则。", "opts": [{"label": "A", "text": "装备"}, {"label": "B", "text": "技术"}, {"label": "C", "text": "检查"}], "answer": "A", "score": 1}, {"id": "s2", "type": "single", "section": "第二章 单选题（每题1分，共20分）", "q": "煤矿安全生产是指在煤矿生产活动过程中（ ）不受到危害，物（财产）不受到损失。", "opts": [{"label": "A", "text": "人的生命"}, {"label": "B", "text": "人的生命与健康"}, {"label": "C", "text": "人的健康"}], "answer": "B", "score": 1}, {"id": "s3", "type": "single", "section": "第二章 单选题（每题1分，共20分）", "q": "从业人员（ ）违章指挥、强令冒险作业。", "opts": [{"label": "A", "text": "不得拒绝"}, {"label": "B", "text": "有条件服从"}, {"label": "C", "text": "有权拒绝"}], "answer": "C", "score": 1}, {"id": "s4", "type": "single", "section": "第二章 单选题（每题1分，共20分）", "q": "矿山企业必须建立健全安全生产责任制，（ ）对本企业的安全生产工作负责。", "opts": [{"label": "A", "text": "矿长"}, {"label": "B", "text": "各职能机构负责人"}, {"label": "C", "text": "各工种、岗位工人"}, {"label": "D", "text": "特种作业人员"}], "answer": "A", "score": 1}, {"id": "s5", "type": "single", "section": "第二章 单选题（每题1分，共20分）", "q": "离开特种作业岗位（ ）以上的特种作业人员，应当重新进行实际考试，经确认合格后方可上岗作业。", "opts": [{"label": "A", "text": "1年"}, {"label": "B", "text": "10个月"}, {"label": "C", "text": "6个月"}, {"label": "D", "text": "2年"}], "answer": "C", "score": 1}, {"id": "s6", "type": "single", "section": "第二章 单选题（每题1分，共20分）", "q": "采煤工作面回风巷风流中，瓦斯浓度报警值为（ ）。", "opts": [{"label": "A", "text": "1.00%"}, {"label": "B", "text": "0.50%"}, {"label": "C", "text": "1.50%"}, {"label": "D", "text": "2.00%"}], "answer": "A", "score": 1}, {"id": "s7", "type": "single", "section": "第二章 单选题（每题1分，共20分）", "q": "当巷道中出现异常气味，如煤油味、松香味和煤焦油味，表明风流上方有（ ）隐患。", "opts": [{"label": "A", "text": "瓦斯突出"}, {"label": "B", "text": "顶板冒落"}, {"label": "C", "text": "煤炭自燃"}], "answer": "C", "score": 1}, {"id": "s8", "type": "single", "section": "第二章 单选题（每题1分，共20分）", "q": "职业病诊断的费用由（ ）承担。", "opts": [{"label": "A", "text": "本人"}, {"label": "B", "text": "职业病防治机构"}, {"label": "C", "text": "用人单位"}, {"label": "D", "text": "国家"}], "answer": "C", "score": 1}, {"id": "s9", "type": "single", "section": "第二章 单选题（每题1分，共20分）", "q": "采用止血带止血时，持续时间一般不超过（ ）。", "opts": [{"label": "A", "text": "0.5h"}, {"label": "B", "text": "1h"}, {"label": "C", "text": "1.5h"}, {"label": "D", "text": "2h"}], "answer": "B", "score": 1}, {"id": "s10", "type": "single", "section": "第二章 单选题（每题1分，共20分）", "q": "矿工井下遇险佩戴自救器后，若吸入空气温度升高，感到干热，则应（ ）。", "opts": [{"label": "A", "text": "取掉口具或鼻夹吸气"}, {"label": "B", "text": "坚持佩戴，脱离险区"}, {"label": "C", "text": "改用湿巾"}], "answer": "B", "score": 1}, {"id": "s11", "type": "single", "section": "第二章 单选题（每题1分，共20分）", "q": "在地质构造应力作用下，发生密集的裂隙、破碎，碎粒在移动过程中由于粒间的摩擦、挤压、揉搓，形成更小的碎粒，直到成为细粉状，这样的煤已失去原生结构，我们把这种煤称为（ ）。", "opts": [{"label": "A", "text": "原始煤"}, {"label": "B", "text": "构造煤"}, {"label": "C", "text": "软煤"}], "answer": "B", "score": 1}, {"id": "s12", "type": "single", "section": "第二章 单选题（每题1分，共20分）", "q": "形成构造煤是发生突出的必要条件之一。突出煤层中构造煤厚度增大，突出危险性也相应（ ）。", "opts": [{"label": "A", "text": "增大"}, {"label": "B", "text": "减小"}, {"label": "C", "text": "不变"}], "answer": "A", "score": 1}, {"id": "s13", "type": "single", "section": "第二章 单选题（每题1分，共20分）", "q": "瓦斯地质图是综合反映（ ）赋存分布规律及其地质条件、瓦斯含量、瓦斯涌出量、瓦斯突出点分布及瓦斯突出预测参数等瓦斯、地质诸因素的基础图件。", "opts": [{"label": "A", "text": "煤层"}, {"label": "B", "text": "瓦斯"}, {"label": "C", "text": "含水层"}], "answer": "B", "score": 1}, {"id": "s14", "type": "single", "section": "第二章 单选题（每题1分，共20分）", "q": "矿井瓦斯地质图一般选用矿井可采煤层底板等高线图作为编制底图。对开采急倾斜煤层的矿井，则以煤层立面投影图为底图。无论平面图或是立面图，均应表示（ ）两个方面的内容。", "opts": [{"label": "A", "text": "瓦斯、地质"}, {"label": "B", "text": "地质、水文"}, {"label": "C", "text": "瓦斯、水文"}], "answer": "A", "score": 1}, {"id": "s15", "type": "single", "section": "第二章 单选题（每题1分，共20分）", "q": "矿井在采掘过程中，只要发生过（ ）次经事故调查认定为煤与瓦斯突出事故的，该矿井即为突出矿井。", "opts": [{"label": "A", "text": "1"}, {"label": "B", "text": "2"}, {"label": "C", "text": "3"}], "answer": "A", "score": 1}, {"id": "s16", "type": "single", "section": "第二章 单选题（每题1分，共20分）", "q": "在采用钻屑法、复合指标法、R值指标法进行煤巷掘进工作面突出危险性预测时，预测钻孔的直径为（ ）。", "opts": [{"label": "A", "text": "φ73mm"}, {"label": "B", "text": "φ42mm"}, {"label": "C", "text": "φ50mm"}, {"label": "D", "text": "φ63mm"}], "answer": "B", "score": 1}, {"id": "s17", "type": "single", "section": "第二章 单选题（每题1分，共20分）", "q": "石门和立井、斜井揭煤工作面的突出危险性预测必须在距突出煤层最小法向距离（ ）（地质构造复杂、岩石破碎的区域应适当加大距离）前进行。", "opts": [{"label": "A", "text": "2m"}, {"label": "B", "text": "3m"}, {"label": "C", "text": "5m"}, {"label": "D", "text": "7m"}], "answer": "C", "score": 1}, {"id": "s18", "type": "single", "section": "第二章 单选题（每题1分，共20分）", "q": "采用远距离爆破揭开突出煤层时，要求石门、斜井揭煤工作面与煤层间的最小法向距离是：急倾斜煤层（ ），其他煤层1.5m。", "opts": [{"label": "A", "text": "2m"}, {"label": "B", "text": "2.5m"}, {"label": "C", "text": "1.5m"}, {"label": "D", "text": "1m"}], "answer": "A", "score": 1}, {"id": "s19", "type": "single", "section": "第二章 单选题（每题1分，共20分）", "q": "采用综合指标法预测石门揭煤工作面突出危险性时，应当由工作面向煤层的适当位置至少打（ ）个钻孔测定煤层瓦斯压力。", "opts": [{"label": "A", "text": "2"}, {"label": "B", "text": "3"}, {"label": "C", "text": "5"}, {"label": "D", "text": "7"}], "answer": "B", "score": 1}, {"id": "s20", "type": "single", "section": "第二章 单选题（每题1分，共20分）", "q": "石门揭煤工作面突出预测综合指标D、K都小于临界值（D小于0.25，K无烟煤小于20、其他煤种小于15）时，若未发现其他异常，该工作面即为（ ）。", "opts": [{"label": "A", "text": "突出危险工作面"}, {"label": "B", "text": "无突出危险工作面"}, {"label": "C", "text": "高瓦斯工作面"}, {"label": "D", "text": "低瓦斯工作面"}], "answer": "B", "score": 1}, {"id": "m1", "type": "multi", "section": "第三章 多选题（每题2分，共20分）", "q": "煤矿井下安全避险“六大系统”是指（ ）。", "opts": [{"label": "A", "text": "监测监控系统"}, {"label": "B", "text": "井下人员定位系统"}, {"label": "C", "text": "紧急避险系统"}, {"label": "D", "text": "压风自救系统"}, {"label": "E", "text": "供水施救系统"}, {"label": "F", "text": "通信联络系统"}, {"label": "G", "text": "运输系统"}], "answer": "ABCDEF", "score": 2}, {"id": "m2", "type": "multi", "section": "第三章 多选题（每题2分，共20分）", "q": "生产经营单位的从业人员在安全生产方面的权利有（ ）。", "opts": [{"label": "A", "text": "了解其作业场所和工作岗位存在的危险因素、防范措施及事故应急措施"}, {"label": "B", "text": "对本单位的安全生产工作提出建议"}, {"label": "C", "text": "对本单位安全生产工作中存在的问题提出批评、检举、控告"}, {"label": "D", "text": "拒绝违章指挥和强令冒险作业"}, {"label": "E", "text": "发现直接危及人身安全的紧急情况时，停止作业或者在采取可能的应急措施后撤离作业场所"}], "answer": "ABCDE", "score": 2}, {"id": "m3", "type": "multi", "section": "第三章 多选题（每题2分，共20分）", "q": "生产经营单位要加强对生产现场的监督检查，严格查处（ ）的“三违”行为。", "opts": [{"label": "A", "text": "违章指挥"}, {"label": "B", "text": "违反交通规则"}, {"label": "C", "text": "违反劳动纪律"}, {"label": "D", "text": "违章作业"}], "answer": "ACD", "score": 2}, {"id": "m4", "type": "multi", "section": "第三章 多选题（每题2分，共20分）", "q": "《安全生产法》规定，生产经营单位与从业人员订立的劳动合同，应当载明有关保障从业人员（ ）的事项。", "opts": [{"label": "A", "text": "工伤社会保险"}, {"label": "B", "text": "劳动安全"}, {"label": "C", "text": "住房公积金"}, {"label": "D", "text": "防止职业危害"}], "answer": "ABD", "score": 2}, {"id": "m5", "type": "multi", "section": "第三章 多选题（每题2分，共20分）", "q": "瓦斯的主要性质有（ ）。", "opts": [{"label": "A", "text": "窒息性"}, {"label": "B", "text": "扩散性"}, {"label": "C", "text": "可燃性"}, {"label": "D", "text": "爆炸性"}], "answer": "ABCD", "score": 2}, {"id": "m6", "type": "multi", "section": "第三章 多选题（每题2分，共20分）", "q": "在煤矿井下，硫化氢气体危害的主要表现为（ ）。", "opts": [{"label": "A", "text": "刺激性、有毒性"}, {"label": "B", "text": "可燃性"}, {"label": "C", "text": "致使瓦斯传感器催化剂“中毒”"}, {"label": "D", "text": "爆炸性"}], "answer": "ABCD", "score": 2}, {"id": "m7", "type": "multi", "section": "第三章 多选题（每题2分，共20分）", "q": "煤矿特种作业人员应具备的素质是（ ）。", "opts": [{"label": "A", "text": "安全意识牢固"}, {"label": "B", "text": "法制观念强"}, {"label": "C", "text": "专业技术水平高"}, {"label": "D", "text": "工作作风好"}], "answer": "ABCD", "score": 2}, {"id": "m8", "type": "multi", "section": "第三章 多选题（每题2分，共20分）", "q": "突出煤矿企业、矿井进行安全检查时，必须检查综合防突措施的（ ）。", "opts": [{"label": "A", "text": "编制"}, {"label": "B", "text": "审批"}, {"label": "C", "text": "贯彻执行情况"}, {"label": "D", "text": "归档情况"}], "answer": "ABC", "score": 2}, {"id": "m9", "type": "multi", "section": "第三章 多选题（每题2分，共20分）", "q": "防突工每年一次的专项培训包括（ ）等内容。", "opts": [{"label": "A", "text": "防突的理论知识"}, {"label": "B", "text": "突出发生的规律"}, {"label": "C", "text": "区域和局部综合防突措施"}, {"label": "D", "text": "有关防突的规章制度"}], "answer": "ABCD", "score": 2}, {"id": "m10", "type": "multi", "section": "第三章 多选题（每题2分，共20分）", "q": "“四位一体”综合防突措施是指（ ）。", "opts": [{"label": "A", "text": "防治突出技术措施"}, {"label": "B", "text": "突出危险性预测"}, {"label": "C", "text": "防突措施效果检验"}, {"label": "D", "text": "开采保护层"}, {"label": "E", "text": "安全防护措施"}], "answer": "ABCE", "score": 2}];
+
+const userAnswers = {};
+let answeredCount = 0;
+
+document.getElementById('total-count').textContent = QUESTIONS.length;
+
+function updateProgress() {
+  const pct = (answeredCount / QUESTIONS.length * 100).toFixed(1);
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('answered-count').textContent = answeredCount;
+}
+
+function buildQuiz() {
+  const container = document.getElementById('quiz-container');
+  let lastSection = '';
+  QUESTIONS.forEach((q, idx) => {
+    if (q.section !== lastSection) {
+      lastSection = q.section;
+      const st = document.createElement('div');
+      st.className = 'section-title';
+      st.textContent = q.section;
+      container.appendChild(st);
+    }
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = 'card-' + q.id;
+
+    const badgeMap = {single:'\u5355\u9009', multi:'\u591a\u9009', judge:'\u5224\u65ad'};
+    const badgeClass = {single:'badge-single', multi:'badge-multi', judge:'badge-judge'};
+    card.innerHTML = `
+      <div>
+        <span class="q-num">${idx+1}</span>
+        <span class="q-type-badge ${badgeClass[q.type]}">${badgeMap[q.type]}</span>
+      </div>
+      <div class="q-text">${q.q}</div>
+    `;
+
+    if (q.type === 'single') {
+      const opts = document.createElement('div');
+      opts.className = 'options';
+      q.opts.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.dataset.val = opt.label;
+        btn.innerHTML = `<span class="option-label">${opt.label}</span><span>${opt.text}</span>`;
+        btn.onclick = () => answerSingle(q.id, opt.label, q.answer, btn, opts);
+        opts.appendChild(btn);
+      });
+      card.appendChild(opts);
+    } else if (q.type === 'multi') {
+      const hint = document.createElement('div');
+      hint.className = 'multi-hint';
+      hint.textContent = '\uff08\u591a\u9009\u9898\uff0c\u8bf7\u9009\u62e9\u6240\u6709\u6b63\u786e\u9009\u9879\uff09';
+      card.appendChild(hint);
+      const opts = document.createElement('div');
+      opts.className = 'options';
+      q.opts.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.dataset.val = opt.label;
+        btn.dataset.selected = '0';
+        btn.innerHTML = `<span class="option-label">${opt.label}</span><span>${opt.text}</span>`;
+        btn.onclick = () => toggleMulti(btn, q.id);
+        opts.appendChild(btn);
+      });
+      card.appendChild(opts);
+      const confirmWrap = document.createElement('div');
+      confirmWrap.className = 'multi-confirm-wrap';
+      confirmWrap.id = 'confirm-' + q.id;
+      const confirmBtn = document.createElement('button');
+      confirmBtn.className = 'multi-confirm-btn';
+      confirmBtn.textContent = '\u786e\u8ba4\u63d0\u4ea4\u672c\u9898';
+      confirmBtn.id = 'cbtn-' + q.id;
+      confirmBtn.disabled = true;
+      confirmBtn.onclick = () => answerMulti(q.id, q.answer, opts, confirmBtn);
+      confirmWrap.appendChild(confirmBtn);
+      card.appendChild(confirmWrap);
+    } else if (q.type === 'judge') {
+      const opts = document.createElement('div');
+      opts.className = 'judge-opts';
+      ['\u221a','\u00d7'].forEach(val => {
+        const btn = document.createElement('button');
+        btn.className = 'judge-btn';
+        btn.textContent = val;
+        btn.dataset.val = val;
+        btn.onclick = () => answerJudge(q.id, val, q.answer, btn, opts);
+        opts.appendChild(btn);
+      });
+      card.appendChild(opts);
+    }
+
+    const fb = document.createElement('div');
+    fb.className = 'feedback';
+    fb.id = 'fb-' + q.id;
+    card.appendChild(fb);
+    container.appendChild(card);
+  });
+}
+
+function showFeedback(id, correct, correctAnswer) {
+  const fb = document.getElementById('fb-' + id);
+  fb.className = 'feedback show ' + (correct ? 'ok' : 'fail');
+  fb.innerHTML = correct
+    ? '\u2705 \u56de\u7b54\u6b63\u786e\uff01'
+    : `\u274c \u56de\u7b54\u9519\u8bef\uff0c\u6b63\u786e\u7b54\u6848\uff1a<strong>${correctAnswer}</strong>`;
+}
+
+function answerSingle(id, val, answer, btn, opts) {
+  if (userAnswers[id] !== undefined) return;
+  userAnswers[id] = val;
+  answeredCount++;
+  updateProgress();
+  const correct = val === answer;
+  opts.querySelectorAll('.option-btn').forEach(b => {
+    b.disabled = true;
+    if (b.dataset.val === answer) b.classList.add('correct');
+    else if (b.dataset.val === val && !correct) b.classList.add('wrong');
+  });
+  showFeedback(id, correct, answer);
+  document.getElementById('card-' + id).classList.add('answered');
+}
+
+function toggleMulti(btn, id) {
+  if (userAnswers[id] !== undefined) return;
+  const sel = btn.dataset.selected === '1';
+  btn.dataset.selected = sel ? '0' : '1';
+  btn.classList.toggle('selected', !sel);
+  const opts = btn.closest('.options');
+  const anySelected = opts.querySelectorAll('[data-selected="1"]').length > 0;
+  document.getElementById('cbtn-' + id).disabled = !anySelected;
+}
+
+function answerMulti(id, answer, opts, confirmBtn) {
+  if (userAnswers[id] !== undefined) return;
+  const selected = Array.from(opts.querySelectorAll('[data-selected="1"]'))
+    .map(b => b.dataset.val).sort().join('');
+  const sortedAnswer = answer.split('').sort().join('');
+  userAnswers[id] = selected;
+  answeredCount++;
+  updateProgress();
+  const correct = selected === sortedAnswer;
+  const correctSet = new Set(sortedAnswer.split(''));
+  opts.querySelectorAll('.option-btn').forEach(b => {
+    b.disabled = true;
+    const isCorrect = correctSet.has(b.dataset.val);
+    const isSelected = b.dataset.selected === '1';
+    if (isCorrect) b.classList.add('correct');
+    else if (isSelected) b.classList.add('wrong');
+  });
+  confirmBtn.disabled = true;
+  showFeedback(id, correct, answer);
+  document.getElementById('card-' + id).classList.add('answered');
+}
+
+function answerJudge(id, val, answer, btn, opts) {
+  if (userAnswers[id] !== undefined) return;
+  userAnswers[id] = val;
+  answeredCount++;
+  updateProgress();
+  const correct = val === answer;
+  opts.querySelectorAll('.judge-btn').forEach(b => {
+    b.disabled = true;
+    if (b.dataset.val === answer) b.classList.add('correct');
+    else if (b.dataset.val === val && !correct) b.classList.add('wrong');
+  });
+  showFeedback(id, correct, answer);
+  document.getElementById('card-' + id).classList.add('answered');
+}
+
+function submitQuiz() {
+  let totalScore = 0, earnedScore = 0, unanswered = 0;
+  let judgeC=0,judgeT=0,singleC=0,singleT=0,multiC=0,multiT=0;
+  QUESTIONS.forEach(q => {
+    totalScore += q.score;
+    if (userAnswers[q.id] === undefined) { unanswered++; return; }
+    let isCorrect = false;
+    if (q.type === 'judge') {
+      judgeT++;
+      isCorrect = userAnswers[q.id] === q.answer;
+      if(isCorrect) judgeC++;
+    } else if (q.type === 'single') {
+      singleT++;
+      isCorrect = userAnswers[q.id] === q.answer;
+      if(isCorrect) singleC++;
+    } else if (q.type === 'multi') {
+      multiT++;
+      isCorrect = userAnswers[q.id].split('').sort().join('') === q.answer.split('').sort().join('');
+      if(isCorrect) multiC++;
+    }
+    if (isCorrect) earnedScore += q.score;
+  });
+  document.getElementById('res-score').textContent = earnedScore;
+  document.getElementById('res-total').textContent = '/ ' + totalScore + ' \u5206';
+  let grade = '';
+  if (earnedScore >= 90) grade = '\ud83c\udfc6 \u4f18\u79c0\uff01';
+  else if (earnedScore >= 80) grade = '\ud83d\udc4d \u826f\u597d';
+  else if (earnedScore >= 60) grade = '\u2705 \u53ca\u683c';
+  else grade = '\u274c \u9700\u52a0\u5f3a\u7ec3\u4e60';
+  document.getElementById('res-grade').textContent = grade;
+  document.getElementById('res-detail').innerHTML =
+    `\u5171 ${QUESTIONS.length} \u9898\uff0c\u5df2\u7b54 ${QUESTIONS.length - unanswered} \u9898\uff0c\u5f97\u5206 ${earnedScore}/${totalScore}<br>` +
+    `\u5224\u65ad\uff1a${judgeC}/${judgeT} &nbsp; \u5355\u9009\uff1a${singleC}/${singleT} &nbsp; \u591a\u9009\uff1a${multiC}/${multiT}` +
+    (unanswered > 0 ? `<br><span style="color:#e53935">\u26a0\ufe0f \u8fd8\u6709 ${unanswered} \u9898\u672a\u4f5c\u7b54</span>` : '');
+  document.getElementById('result-modal').classList.add('show');
+}
+
+buildQuiz();
+updateProgress();
+</script>
+</body>
+</html>
